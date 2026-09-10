@@ -26,7 +26,7 @@ export default function PpdDashboard() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<PpdData>(`/dashboard/ppd/${id ?? ""}`)
+    api<PpdData>(`/api/portal/ppd/${id ?? ""}`)
       .then((res) => {
         if (!cancelled) setData(res);
       })

@@ -21,7 +21,7 @@ export default function SchoolDashboard() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<DashboardData>(`/dashboard/school/${school ?? ""}`)
+    api<DashboardData>(`/api/portal/school/dashboard/${school ?? ""}`)
       .then((res) => {
         if (!cancelled) setData(res);
       })

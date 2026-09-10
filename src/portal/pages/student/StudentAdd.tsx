@@ -26,15 +26,11 @@ export default function StudentAdd() {
     setErrors([]);
     setSaving(true);
 
-    const body: Record<string, string> = {};
-    students.forEach((student, index) => {
-      (Object.keys(student) as (keyof StudentFormData)[]).forEach((field) => {
-        body[`students[${index}][${field}]`] = student[field];
-      });
-    });
-
     try {
-      await api("/student/store", { method: "POST", body, form: true });
+      // one request per student row - the API stores them individually
+      for (const student of students) {
+        await api("/api/portal/students", { method: "POST", body: student });
+      }
       navigate("/student");
     } catch (err) {
       if (err instanceof ApiError && err.errors) {

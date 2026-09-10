@@ -21,7 +21,7 @@ export default function CountryDashboard() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<CountryData>("/dashboard")
+    api<CountryData>("/api/portal/country")
       .then((res) => {
         if (!cancelled) setData(res);
       })

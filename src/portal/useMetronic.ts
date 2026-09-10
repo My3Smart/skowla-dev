@@ -58,6 +58,19 @@ export function useMetronic() {
       });
 
     (async () => {
+      // The theme bundle is injected after DOMContentLoaded, so its own
+      // "on load" callbacks fire before KTThemeMode is defined. Provide a
+      // temporary stub; the bundle overwrites it once evaluated.
+      const win = window as any;
+      if (!win.KTThemeMode) {
+        win.KTThemeMode = {
+          on: () => {},
+          getMode: () => "light",
+          getMenuMode: () => "light",
+          setMode: () => {},
+          init: () => {},
+        };
+      }
       for (const src of JS) await loadScript(src);
       if (!cancelled) setReady(true);
     })();

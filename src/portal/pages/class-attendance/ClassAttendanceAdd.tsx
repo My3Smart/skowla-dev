@@ -34,7 +34,7 @@ export default function ClassAttendanceAdd() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<AddData>(`/class_attendance/add?${params.toString()}`)
+    api<AddData>(`/api/portal/class-attendance?${params.toString()}`)
       .then((res) => {
         if (!cancelled) setData(res);
       })
@@ -68,7 +68,7 @@ export default function ClassAttendanceAdd() {
       body[`attendance[${s.id}]`] = String(form.get(`attendance[${s.id}]`) ?? "Present");
     });
     try {
-      await api("/class-attendance/save", { method: "POST", body, form: true });
+      await api("/api/portal/class-attendance", { method: "POST", body, form: true });
       navigate(`/class-attendance?grade=${grade}&class_name=${className}&subject=${subject}`);
     } catch {
       /* keep on page; backend may be unreachable in preview */

@@ -18,7 +18,7 @@ export default function Attendance() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api<{ attendances?: AttendanceRow[] }>("/attendance")
+    api<{ attendances?: AttendanceRow[] }>("/api/portal/parent/attendance")
       .then((res) => setAttendances(res.attendances ?? []))
       .catch(() => setAttendances([]))
       .finally(() => setLoading(false));

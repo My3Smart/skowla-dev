@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/portal/layouts/AppLayout";
 import { Card } from "@/portal/components/Card";
@@ -15,29 +15,40 @@ interface UserRow {
 export default function AdminUsers() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const load = useCallback(async (term = "") => {
     setLoading(true);
-    api<{ users?: UserRow[]; success?: string; error?: string }>("/admin")
-      .then((res) => {
-        if (cancelled) return;
-        setUsers(res.users ?? []);
-        setSuccess(res.success ?? null);
-        setError(res.error ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setUsers([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+    try {
+      const res = await api<{ users?: UserRow[] }>(
+        `/api/portal/users${term ? `?search=${encodeURIComponent(term)}` : ""}`
+      );
+      setUsers(res.users ?? []);
+      setError(null);
+    } catch (e) {
+      setUsers([]);
+      setError(e instanceof Error ? e.message : "Unable to load users.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const remove = async (u: UserRow) => {
+    if (!window.confirm(`Delete ${u.name}?`)) return;
+    try {
+      await api(`/api/portal/users/${u.id}`, { method: "DELETE" });
+      setSuccess("User deleted.");
+      await load(search);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Delete failed.");
+    }
+  };
 
   return (
     <AppLayout title="User List" role="admin">
@@ -46,8 +57,15 @@ export default function AdminUsers() {
           <div className="page-title d-flex flex-column justify-content-center gap-2 me-3">
             <h1 className="page-heading d-flex flex-column justify-content-center text-dark fw-bolder fs-1 m-0">User List</h1>
           </div>
-          <div>
-            <Link to="/admin/create" className="btn btn-primary">
+          <div className="d-flex gap-2">
+            <input
+              className="form-control form-control-solid w-250px"
+              placeholder="Search name, email or phone"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && load(search)}
+            />
+            <Link to="/admin/users/add" className="btn btn-primary">
               <i className="ki-duotone ki-plus fs-2" />Create User
             </Link>
           </div>
@@ -83,7 +101,10 @@ export default function AdminUsers() {
                           <td>{u.phone_num}</td>
                           <td>{(u.roles ?? []).join(", ")}</td>
                           <td className="text-end">
-                            <Link to={`/admin/edit/${u.id}`} className="btn btn-sm btn-light-primary">Edit</Link>
+                            <Link to={`/admin/users/${u.id}/edit`} className="btn btn-sm btn-light-primary me-2">Edit</Link>
+                            <button type="button" className="btn btn-sm btn-light-danger" onClick={() => remove(u)}>
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}

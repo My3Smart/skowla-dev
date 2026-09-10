@@ -26,7 +26,7 @@ export default function StateDashboard() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<StateData>(`/dashboard/state/${id ?? ""}`)
+    api<StateData>(`/api/portal/state/${id ?? ""}`)
       .then((res) => {
         if (!cancelled) setData(res);
       })

@@ -28,7 +28,7 @@ export default function StudentIndex() {
     setLoading(true);
     try {
       const res = await api<{ students?: StudentRow[] }>(
-        `/students/filter?grade=${encodeURIComponent(grade)}&class_name=${encodeURIComponent(className)}`
+        `/api/portal/students?grade=${encodeURIComponent(grade)}&class_name=${encodeURIComponent(className)}`
       );
       setStudents(res.students ?? []);
     } catch {
@@ -47,13 +47,12 @@ export default function StudentIndex() {
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
-    const body: Record<string, string> = {};
+    const payload: Record<number, { type: string; text: string }> = {};
     Object.values(remarks).forEach((r) => {
-      body[`remarks[${r.id}][type]`] = r.type;
-      body[`remarks[${r.id}][text]`] = r.text;
+      payload[r.id] = { type: r.type, text: r.text };
     });
     try {
-      await api("/students/remarks", { method: "POST", body, form: true });
+      await api("/api/portal/students/remarks", { method: "POST", body: { remarks: payload } });
       setMessage("Remarks saved successfully");
     } catch {
       setMessage("Unable to save remarks.");

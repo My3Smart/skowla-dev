@@ -30,7 +30,7 @@ export default function GuardianShow() {
 
   useEffect(() => {
     if (!id) return;
-    api<GuardianShowResponse>(`/profile/guardian/${id}`)
+    api<GuardianShowResponse>(`/api/portal/profile/guardian/${id}`)
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));
@@ -39,7 +39,7 @@ export default function GuardianShow() {
   const handleDelete = async () => {
     if (!id || !confirm("Are you sure you want to delete this guardian?")) return;
     try {
-      await api(`/profile/guardian/${id}/delete`, { method: "DELETE", form: true });
+      await api(`/api/portal/profile/guardian/${id}`, { method: "DELETE" });
       navigate("/profile");
     } catch {
       /* ignore */

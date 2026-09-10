@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMetronic } from "../useMetronic";
-import { useAuth } from "../auth";
+import { useAuth, resolveRole } from "../auth";
+import { homeForRole } from "../roles";
 import "../portal.css";
 
 export default function Login() {
@@ -12,7 +13,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Log In | 3S Portal";
+    document.title = "Log In";
     document.body.classList.add(
       "app-blank",
       "bgi-size-cover",
@@ -38,8 +39,12 @@ export default function Login() {
     setSubmitting(true);
     setError(null);
     try {
-      await login(String(form.get("email") ?? ""), String(form.get("password") ?? ""));
-      navigate("/dashboard");
+      const user = await login(
+        String(form.get("email") ?? ""),
+        String(form.get("password") ?? ""),
+      );
+      // send each role straight to its own dashboard
+      navigate(homeForRole(resolveRole(user)), { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "These credentials do not match our records.");
     } finally {
@@ -47,61 +52,61 @@ export default function Login() {
     }
   };
 
-
   if (!ready) {
     return <div className="min-vh-100 d-flex flex-center text-muted">Loading…</div>;
   }
 
   return (
-    <main className="d-flex flex-column flex-root" id="kt_app_root">
+    <div className="d-flex flex-column flex-root" id="kt_app_root">
+      {/* begin::Authentication - Sign-in */}
       <div className="d-flex flex-column flex-lg-row flex-column-fluid">
-        <section className="d-flex flex-lg-row-fluid" aria-label="3S Portal introduction">
+        {/* begin::Aside */}
+        <div className="d-flex flex-lg-row-fluid">
           <div className="d-flex flex-column flex-center pb-0 pb-lg-10 p-10 w-100">
             <img
-              className="theme-light-show mx-auto mw-100 w-150px w-lg-300px mb-10 mb-lg-20"
-              src="/assets/media/auth/agency.png"
-              alt="3S Portal"
+              className="theme-light-show mx-auto mw-100 w-500px w-lg-800px mb-0"
+              src="/assets/media/auth/skoolahd.png"
+              alt=""
             />
             <img
               className="theme-dark-show mx-auto mw-100 w-150px w-lg-300px mb-10 mb-lg-20"
               src="/assets/media/auth/agency-dark.png"
-              alt="3S Portal"
+              alt=""
             />
             <h1 className="text-gray-800 fs-2qx fw-bold text-center mb-7">
               Fast, Efficient and Productive
             </h1>
           </div>
-        </section>
+        </div>
+        {/* end::Aside */}
 
-        <section className="d-flex flex-column-fluid flex-lg-row-auto justify-content-center justify-content-lg-end p-12">
+        {/* begin::Body */}
+        <div className="d-flex flex-column-fluid flex-lg-row-auto justify-content-center justify-content-lg-end p-12">
           <div className="bg-body d-flex flex-column flex-center rounded-4 w-md-600px p-10">
             <div className="d-flex flex-center flex-column align-items-stretch h-lg-100 w-md-400px">
               <div className="d-flex flex-center flex-column flex-column-fluid pb-15 pb-lg-20">
                 <form className="form w-100" onSubmit={handleSubmit}>
+                  {/* begin::Heading */}
                   <div className="text-center mb-11">
-                    <h2 className="text-dark fw-bolder mb-3">Log In</h2>
+                    {error && (
+                      <div className="alert alert-danger text-center mt-3">{error}</div>
+                    )}
+                    <h1 className="text-dark fw-bolder mb-3">Log In</h1>
                     <div className="text-gray-500 fw-semibold fs-6">
                       Log in here to view dashboard and other features!
                     </div>
                   </div>
-
-                  {error && (
-                    <div className="alert alert-danger d-flex align-items-center p-5 mb-8">
-                      <span className="fw-semibold">{error}</span>
-                    </div>
-                  )}
-
+                  {/* end::Heading */}
 
                   <div className="fv-row mb-8">
                     <input
-                      type="email"
+                      type="text"
                       placeholder="Email"
                       name="email"
                       className="form-control bg-transparent"
                       required
                       autoFocus
                       autoComplete="username"
-                      aria-label="Email"
                     />
                   </div>
                   <div className="fv-row mb-3">
@@ -112,7 +117,6 @@ export default function Login() {
                       className="form-control bg-transparent"
                       required
                       autoComplete="current-password"
-                      aria-label="Password"
                     />
                   </div>
 
@@ -124,41 +128,65 @@ export default function Login() {
                   </div>
 
                   <div className="d-grid mb-10">
-                    <button type="submit" className="btn btn-primary" disabled={submitting}>
-                      <span className={submitting ? "d-none" : "indicator-label"}>Log In</span>
-                      {submitting && (
+                    <button
+                      type="submit"
+                      id="kt_sign_in_submit"
+                      className="btn btn-primary"
+                      disabled={submitting}
+                    >
+                      {submitting ? (
                         <span className="indicator-label">
-                          Please wait…
+                          Please wait...
                           <span className="spinner-border spinner-border-sm align-middle ms-2" />
                         </span>
+                      ) : (
+                        <span className="indicator-label">Log In</span>
                       )}
                     </button>
                   </div>
 
                   <a
                     href="/auth/google"
-                    className="btn w-100 d-flex align-items-center justify-content-center gap-2 border bg-white mb-3 portal-social-button"
+                    className="btn w-100 d-flex align-items-center justify-content-center gap-2 border bg-white"
+                    style={{ borderRadius: 8, padding: 10 }}
                   >
-                    <img src="/assets/media/svg/social-logos/google.svg" alt="" width="20" height="20" />
+                    <img
+                      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                      alt="Google Logo"
+                      width={20}
+                      height={20}
+                    />
                     <span className="fw-semibold text-dark">Continue with Google</span>
                   </a>
+
                   <a
                     href="/auth/facebook"
-                    className="btn w-100 d-flex align-items-center justify-content-center gap-2 border bg-white portal-social-button"
+                    className="btn w-100 d-flex align-items-center justify-content-center gap-2 border"
+                    style={{ backgroundColor: "#fff", color: "#1877F2", borderRadius: 8, padding: 10 }}
                   >
-                    <img src="/assets/media/svg/social-logos/facebook.svg" alt="" width="20" height="20" />
-                    <span className="fw-semibold text-primary">Continue with Facebook</span>
+                    <img
+                      src="https://www.svgrepo.com/show/475647/facebook-color.svg"
+                      alt="Facebook Logo"
+                      width={20}
+                      height={20}
+                    />
+                    <span className="fw-semibold">Continue with Facebook</span>
                   </a>
 
                   <div className="text-gray-500 text-center fw-semibold fs-6 mt-4">
-                    Not a Member yet? <a href="/register" className="link-primary">Register Now!</a>
+                    Not a Member yet?{" "}
+                    <a href="/register" className="link-primary">
+                      Register Now!
+                    </a>
                   </div>
                 </form>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+        {/* end::Body */}
       </div>
-    </main>
+      {/* end::Authentication - Sign-in */}
+    </div>
   );
 }
