@@ -47,7 +47,7 @@ export default function StudentEdit() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api<EditResponse>(`/student/edit/${id}`)
+    api<EditResponse>(`/api/portal/students/${id}`)
       .then((res) => setStudent(res.student))
       .catch(() => setStudent(null))
       .finally(() => setLoading(false));
@@ -63,9 +63,8 @@ export default function StudentEdit() {
     setSaving(true);
     setErrors([]);
     try {
-      await api(`/student/update/${id}`, {
-        method: "POST",
-        form: true,
+      await api(`/api/portal/students/${id}`, {
+        method: "PUT",
         body: {
           name: student.name,
           ic: student.ic,
@@ -80,9 +79,9 @@ export default function StudentEdit() {
           orphan: student.orphan ?? "",
           address: student.address ?? "",
           oku: student.oku ?? "",
-          state: student.state_id ?? "",
-          district: student.district_id ?? "",
-          school: student.school_id ?? "",
+          state_id: student.state_id || null,
+          district_id: student.district_id || null,
+          school_id: student.school_id || null,
         },
       });
       navigate("/student");

@@ -28,7 +28,7 @@ export default function Reports() {
     let cancelled = false;
     setLoading(true);
     const qs = searchParams.toString();
-    api<ReportRecord[]>(`/school/reports${qs ? `?${qs}` : ""}`)
+    api<ReportRecord[]>(`/api/portal/school/reports${qs ? `?${qs}` : ""}`)
       .then((res) => {
         if (!cancelled) setRecords(res ?? []);
       })

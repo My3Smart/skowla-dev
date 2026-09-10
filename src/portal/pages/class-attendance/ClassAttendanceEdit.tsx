@@ -33,7 +33,7 @@ export default function ClassAttendanceEdit() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<EditData>(`/class_attendance/edit?${params.toString()}`)
+    api<EditData>(`/api/portal/class-attendance?${params.toString()}`)
       .then((res) => {
         if (!cancelled) setData(res);
       })
@@ -63,7 +63,7 @@ export default function ClassAttendanceEdit() {
       body[`attendance[${s.id}]`] = String(form.get(`attendance[${s.id}]`) ?? "");
     });
     try {
-      await api("/class-attendance/update", { method: "POST", body, form: true });
+      await api("/api/portal/class-attendance", { method: "POST", body, form: true });
       navigate(`/class-attendance?grade=${grade}&class_name=${className}&subject=${subject}`);
     } catch {
       /* keep on page */

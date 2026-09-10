@@ -36,7 +36,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api<DashboardResponse>("/parent/dashboard")
+    api<DashboardResponse>("/api/portal/parent/dashboard")
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));

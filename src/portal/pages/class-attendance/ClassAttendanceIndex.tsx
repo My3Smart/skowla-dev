@@ -40,7 +40,7 @@ export default function ClassAttendanceIndex() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<IndexData>(`/class-attendance?${params.toString()}`)
+    api<IndexData>(`/api/portal/class-attendance?${params.toString()}`)
       .then((res) => {
         if (!cancelled) setData(res);
       })

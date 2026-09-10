@@ -28,11 +28,22 @@
 .phpunit.cache/
 .phpunit.cache
 
+# Laravel / environment extras
+.env.backup
+.env.production
+Homestead.json
+Homestead.yaml
+auth.json
+
 # IDE / OS
 .idea/
 .vscode/
+.fleet/
 .DS_Store
 Thumbs.db
+
+# Public generated/system files
+/public/.well-known/
 
 # Logs
 npm-debug.log*

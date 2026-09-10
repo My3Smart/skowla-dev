@@ -3,6 +3,7 @@ import { AuthProvider } from "./portal/auth";
 
 import Login from "./portal/pages/Login";
 import TeacherDashboard from "./portal/pages/TeacherDashboard";
+import RoleHome from "./portal/pages/RoleHome";
 
 import Register from "./portal/pages/auth/Register";
 import ForgotPassword from "./portal/pages/auth/ForgotPassword";
@@ -72,12 +73,14 @@ const App = () => (
         <Route path="/two-factor-challenge" element={<TwoFactorChallenge />} />
 
         {/* Misc public */}
-        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/" element={<Welcome />} />
+        <Route path="/welcome" element={<Navigate to="/" replace />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/policy" element={<Policy />} />
 
         {/* Teacher */}
-        <Route path="/dashboard" element={<TeacherDashboard />} />
+        <Route path="/dashboard" element={<RoleHome />} />
+        <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
 
         {/* Parent */}
         <Route path="/parent/dashboard" element={<ParentDashboard />} />
@@ -129,8 +132,7 @@ const App = () => (
         {/* Legacy redirects */}
         <Route path="/portal/dashboard" element={<Navigate to="/dashboard" replace />} />
         <Route path="/portal" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
   </BrowserRouter>

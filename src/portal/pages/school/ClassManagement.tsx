@@ -17,7 +17,7 @@ export default function ClassManagement() {
 
   useEffect(() => {
     let cancelled = false;
-    api<ClassManagementData>("/dashboard/class-management")
+    api<ClassManagementData>("/api/portal/school/class-management")
       .then((res) => {
         if (cancelled) return;
         setAllGrades(res.allGrades ?? []);
@@ -39,7 +39,7 @@ export default function ClassManagement() {
 
   async function activateGrade(grade: string) {
     try {
-      await api("/dashboard/activate-grade", { method: "POST", body: { grade_name: grade }, form: true });
+      await api("/api/portal/school/grades/activate", { method: "POST", body: { grade_name: grade } });
       setActivatedGrades((prev) => [...prev, grade]);
       setSuccessMsg("Grade activated successfully.");
     } catch {
@@ -49,7 +49,7 @@ export default function ClassManagement() {
 
   async function deactivateGrade(grade: string) {
     try {
-      await api("/dashboard/school/deactivate-grade", { method: "DELETE", body: { grade_name: grade }, form: true });
+      await api("/api/portal/school/grades/deactivate", { method: "POST", body: { grade_name: grade } });
       setActivatedGrades((prev) => prev.filter((g) => g !== grade));
       setSuccessMsg("Grade deactivated successfully.");
     } catch {
@@ -62,7 +62,7 @@ export default function ClassManagement() {
     const gradeName = newGradeName.trim();
     if (!gradeName) return;
     try {
-      const res = await api<{ success?: string }>("/dashboard/school/add-grade", {
+      const res = await api<{ success?: string }>("/api/portal/school/grades/add", {
         method: "POST",
         body: { grade_name: gradeName },
       });

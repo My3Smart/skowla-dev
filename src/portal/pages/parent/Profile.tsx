@@ -36,7 +36,7 @@ export default function Profile() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    api<ProfileResponse>("/profile")
+    api<ProfileResponse>("/api/portal/profile")
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));
@@ -45,7 +45,7 @@ export default function Profile() {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this guardian?")) return;
     try {
-      await api(`/profile/guardian/${id}/delete`, { method: "DELETE", form: true });
+      await api(`/api/portal/profile/guardian/${id}`, { method: "DELETE" });
       setMessage({ type: "success", text: "Guardian deleted successfully." });
       setData((prev) =>
         prev ? { ...prev, guardians: prev.guardians.filter((g) => g.id !== id) } : prev

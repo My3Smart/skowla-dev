@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
+import { api } from "@/portal/api";
 import { AppLayout } from "../layouts/AppLayout";
 import { Card } from "../components/Card";
 
@@ -13,21 +15,6 @@ const LABELS: Record<Period, string> = {
   daily: "Harian",
   weekly: "Mingguan",
   monthly: "Bulanan",
-};
-
-// Stubbed API payload (replaces the Blade @json($attendanceData))
-const classes: Record<string, string> = {
-  "1 Amanah": "Tahun 1",
-  "2 Bestari": "Tahun 2",
-};
-
-const attendanceData: AttendanceData = {
-  "1 Amanah": {
-    daily: [28, 3, 1],
-    weekly: [132, 12, 6],
-    monthly: [540, 48, 22],
-  },
-  "2 Bestari": null,
 };
 
 function DonutChart({ series }: { series: number[] }) {
@@ -53,7 +40,35 @@ function DonutChart({ series }: { series: number[] }) {
 }
 
 export default function TeacherDashboard() {
-  const noClassAssigned = Object.keys(classes).length === 0;
+  const [classes, setClasses] = useState<Record<string, string>>({});
+  const [attendanceData, setAttendanceData] = useState<AttendanceData>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    api<{ classes?: Record<string, string>; attendanceData?: AttendanceData }>(
+      "/api/portal/teacher/dashboard"
+    )
+      .then((res) => {
+        if (cancelled) return;
+        setClasses(res.classes ?? {});
+        setAttendanceData(res.attendanceData ?? {});
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setClasses({});
+          setAttendanceData({});
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const noClassAssigned = !loading && Object.keys(classes).length === 0;
 
   return (
     <AppLayout title="Dashboard" role="teacher">
@@ -66,8 +81,10 @@ export default function TeacherDashboard() {
           </div>
         </div>
 
+        {loading && <div className="text-muted text-center py-10">Memuatkan…</div>}
+
         {noClassAssigned && (
-          <div className="alert alert-warning text-center">No class assigned.</div>
+          <div className="alert alert-warning text-center">Tiada kelas ditetapkan kepada anda.</div>
         )}
 
         {Object.entries(classes).map(([className, gradeName]) => {
@@ -96,7 +113,7 @@ export default function TeacherDashboard() {
                 </div>
               ) : (
                 <div className="alert alert-info text-center">
-                  Attendance not yet recorded for this class.
+                  Kehadiran belum direkodkan untuk kelas ini.
                 </div>
               )}
             </div>

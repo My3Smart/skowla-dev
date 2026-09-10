@@ -19,7 +19,7 @@ export default function StudentList() {
   const success = searchParams.get("success");
 
   useEffect(() => {
-    api<{ students?: StudentRow[] }>("/student")
+    api<{ students?: StudentRow[] }>("/api/portal/students")
       .then((res) => setStudents(res.students ?? []))
       .catch(() => setStudents([]))
       .finally(() => setLoading(false));
@@ -28,7 +28,7 @@ export default function StudentList() {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this student?")) return;
     try {
-      await api(`/student/delete/${id}`);
+      await api(`/api/portal/students/${id}`, { method: "DELETE" });
       setStudents((prev) => prev.filter((s) => s.id !== id));
     } catch {
       /* ignore */
