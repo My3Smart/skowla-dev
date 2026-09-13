@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { GuestLayout } from "../../layouts/GuestLayout";
-import { api } from "../../api";
+import { api, setToken } from "../../api";
 
 export default function VerifyEmail() {
   const [sent, setSent] = useState(false);
@@ -20,7 +20,8 @@ export default function VerifyEmail() {
 
   const logout = async () => {
     try {
-      await api("/logout", { method: "POST", form: true });
+      await api("/api/portal/logout", { method: "POST", body: {} });
+      setToken(null);
     } finally {
       window.location.href = "/login";
     }

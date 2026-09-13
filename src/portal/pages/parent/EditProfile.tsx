@@ -23,7 +23,7 @@ export default function EditProfile() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api<{ user: UserData }>("/profile/edit")
+    api<{ user: UserData }>("/api/portal/profile/edit")
       .then((res) => setUser(res.user))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
@@ -36,7 +36,7 @@ export default function EditProfile() {
     const form = new FormData(e.currentTarget);
     const body = Object.fromEntries(form.entries());
     try {
-      await api("/profile/update", { method: "POST", body, form: true });
+      await api("/api/portal/profile/update", { method: "POST", body });
       navigate("/profile");
     } catch {
       setError("Unable to update profile.");

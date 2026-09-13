@@ -33,7 +33,7 @@ export default function StudentManagement() {
 
   useEffect(() => {
     let cancelled = false;
-    api<ManagementData>(`/dashboard/school/${schoolId}/students/management`)
+    api<ManagementData>(`/api/portal/schools/${schoolId}/students/management`)
       .then((res) => {
         if (cancelled) return;
         setSchool(res.school ?? null);
@@ -146,7 +146,7 @@ export default function StudentManagement() {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
                 try {
-                  await api("/school/students/import", { method: "POST", body: fd });
+                  await api("/api/portal/students/import", { method: "POST", body: fd });
                   setSuccessMsg("Import successful.");
                   setShowImport(false);
                 } catch {

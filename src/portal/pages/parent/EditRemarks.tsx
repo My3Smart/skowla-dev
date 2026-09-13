@@ -24,7 +24,7 @@ export default function EditRemarks() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api<AttendanceDetail>(`/attendance/edit-remarks/${id}`)
+    api<AttendanceDetail>(`/api/portal/remarks/${id}`)
       .then((res) => {
         setData(res);
         setRemarks(res.remarks ?? "all");
@@ -38,9 +38,8 @@ export default function EditRemarks() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api(`/attendance/edit-remarks/${id}`, {
+      await api(`/api/portal/remarks/${id}`, {
         method: "POST",
-        form: true,
         body: { remarks, remarksInput },
       });
       navigate("/attendance");

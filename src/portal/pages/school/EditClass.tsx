@@ -24,12 +24,12 @@ export default function EditClass() {
 
   useEffect(() => {
     let cancelled = false;
-    api<SchoolGrade[]>("/dashboard/edit-class")
+    api<{ grades: SchoolGrade[] }>("/api/portal/class-names")
       .then((res) => {
         if (cancelled) return;
-        setGrades(res ?? []);
+        setGrades(res.grades ?? []);
         const names: Record<number, string> = {};
-        (res ?? []).forEach((g) => g.classes.forEach((c) => (names[c.id] = c.class_name)));
+        (res.grades ?? []).forEach((g) => g.classes.forEach((c) => (names[c.id] = c.class_name)));
         setClassNames(names);
       })
       .catch(() => {
@@ -85,7 +85,7 @@ export default function EditClass() {
       body[`delete_class[${idx}]`] = id;
     });
     try {
-      await api("/dashboard/update-class-names", { method: "POST", body, form: true });
+      await api("/api/portal/class-names", { method: "POST", body, form: true });
       setSuccessMsg("Class names updated successfully!");
     } catch {
       /* ignore */

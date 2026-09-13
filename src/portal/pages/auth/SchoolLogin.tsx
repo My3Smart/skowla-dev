@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMetronic } from "../../useMetronic";
-import { api, ApiError } from "../../api";
+import { api, ApiError, setToken } from "../../api";
 import "../../portal.css";
 
 /** Mirrors school/login.blade.php */
@@ -38,8 +38,12 @@ export default function SchoolLogin() {
     setSubmitting(true);
     setError(null);
     try {
-      await api("/login", { method: "POST", body: { email, password }, form: true });
-      navigate("/school/login");
+      const res = await api<{ token: string }>("/api/portal/login", {
+        method: "POST",
+        body: { email, password },
+      });
+      setToken(res.token);
+      navigate("/dashboard");
     } catch (err) {
       if (err instanceof ApiError) setError(err.errors ? Object.values(err.errors)[0]?.[0] ?? err.message : err.message);
       else setError("Unable to log in.");

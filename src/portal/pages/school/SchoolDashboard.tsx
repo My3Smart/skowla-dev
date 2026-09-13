@@ -104,7 +104,7 @@ export default function SchoolDashboard() {
                 const form = e.currentTarget;
                 const fd = new FormData(form);
                 try {
-                  await api("/school/students/import", { method: "POST", body: fd });
+                  await api("/api/portal/students/import", { method: "POST", body: fd });
                   setSuccessMsg("Import successful.");
                   setShowImport(false);
                 } catch {

@@ -15,7 +15,7 @@ export default function GuardianAdd() {
     const form = new FormData(e.currentTarget);
     const body = Object.fromEntries(form.entries());
     try {
-      await api("/profile/guardian/store", { method: "POST", body, form: true });
+      await api("/api/portal/profile/guardian", { method: "POST", body });
       navigate("/profile");
     } catch {
       setError("Unable to add guardian. Please check the form.");

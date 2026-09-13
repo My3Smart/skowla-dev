@@ -16,7 +16,7 @@ export default function StudentCreate() {
     const body: Record<string, unknown> = {};
     fd.forEach((v, k) => (body[k] = v));
     try {
-      await api("/school/student/store", { method: "POST", body, form: true });
+      await api("/api/portal/students", { method: "POST", body });
       navigate("/school/dashboard");
     } catch (err) {
       if (err instanceof ApiError && err.errors) setErrors(err.errors);

@@ -35,7 +35,7 @@ export default function TeacherEdit() {
 
   useEffect(() => {
     let cancelled = false;
-    api<EditData>(`/school/teachers/${id}/edit`)
+    api<EditData>(`/api/portal/teachers/${id}/edit`)
       .then((res) => {
         if (cancelled) return;
         setTeacher(res.teacher);
@@ -71,7 +71,8 @@ export default function TeacherEdit() {
     e.preventDefault();
     if (!teacher) return;
     try {
-      await api(`/school/teachers/${id}`, { method: "PUT", body: teacher, form: true });
+      await api(`/api/portal/teachers/${id}`, { method: "PUT", body: teacher });
+      await api(`/api/portal/teachers/${id}/classes`, { method: "PUT", body: { classes: teacher.classes } });
       navigate("/school/teachers");
     } catch {
       /* ignore */
