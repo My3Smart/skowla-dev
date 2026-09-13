@@ -25,7 +25,7 @@ export default function GuardianEdit() {
 
   useEffect(() => {
     if (!id) return;
-    api<{ guardian: Guardian }>(`/profile/guardian/${id}/edit`)
+    api<{ guardian: Guardian }>(`/api/portal/profile/guardian/${id}/edit`)
       .then((res) => setGuardian(res.guardian))
       .catch(() => setGuardian(null))
       .finally(() => setLoading(false));
@@ -38,7 +38,7 @@ export default function GuardianEdit() {
     const form = new FormData(e.currentTarget);
     const body = Object.fromEntries(form.entries());
     try {
-      await api(`/profile/guardian/${id}`, { method: "POST", body, form: true });
+      await api(`/api/portal/profile/guardian/${id}`, { method: "PUT", body });
       navigate(`/profile/guardian/${id}`);
     } catch {
       setError("Unable to update guardian.");

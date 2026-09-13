@@ -18,9 +18,8 @@ export default function AdminAddUser() {
     setErrors({});
     const form = new FormData(e.currentTarget);
     try {
-      await api("/admin/store", {
+      await api("/api/portal/users", {
         method: "POST",
-        form: true,
         body: {
           name: String(form.get("name") ?? ""),
           phone_num: String(form.get("phone_num") ?? ""),

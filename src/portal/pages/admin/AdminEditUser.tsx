@@ -26,7 +26,7 @@ export default function AdminEditUser() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<{ user: UserData }>(`/admin/edit/${id}`)
+    api<{ user: UserData }>(`/api/portal/users/${id}`)
       .then((res) => {
         if (cancelled) return;
         setUser(res.user);
@@ -49,9 +49,8 @@ export default function AdminEditUser() {
     setErrors({});
     const form = new FormData(e.currentTarget);
     try {
-      await api(`/admin/update/${id}`, {
-        method: "POST",
-        form: true,
+      await api(`/api/portal/users/${id}`, {
+        method: "PUT",
         body: {
           name: String(form.get("name") ?? ""),
           phone_num: String(form.get("phone_num") ?? ""),

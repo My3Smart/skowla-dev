@@ -31,9 +31,9 @@ export default function StudentDetails() {
 
   useEffect(() => {
     let cancelled = false;
-    api<StudentDetail>(`/school/students/${id}/details`)
+    api<{ student: StudentDetail }>(`/api/portal/students/${id}`)
       .then((res) => {
-        if (!cancelled) setStudent(res);
+        if (!cancelled) setStudent(res.student);
       })
       .catch(() => {
         if (!cancelled) setStudent(null);

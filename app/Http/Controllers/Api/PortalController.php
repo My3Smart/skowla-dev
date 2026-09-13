@@ -15,6 +15,53 @@ use Illuminate\Http\Request;
  */
 class PortalController extends Controller
 {
+    /**
+     * Token login for the React portal. Works cross-origin without cookies,
+     * so the SPA never hits a 401 from a missing session cookie.
+     */
+    public function login(Request $request)
+    {
+        $data = $request->validate([
+            'email'    => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $user = User::where('email', $data['email'])
+            ->orWhere('username', $data['email'])
+            ->first();
+
+        if (! $user || ! \Illuminate\Support\Facades\Hash::check($data['password'], $user->password)) {
+            return response()->json([
+                'message' => 'These credentials do not match our records.',
+                'errors'  => ['email' => ['These credentials do not match our records.']],
+            ], 422);
+        }
+
+        $token = $user->createToken('portal-spa')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => [
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'email'     => $user->email,
+                'school_id' => $user->school_id,
+                'roles'     => $user->getRoleNames(),
+                'role'      => $user->getRoleNames()->first(),
+            ],
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $token = $request->user()?->currentAccessToken();
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     public function me(Request $request)
     {
         $user = $request->user();

@@ -22,8 +22,8 @@ export default function TeacherIndex() {
 
   function loadTeachers() {
     setLoading(true);
-    api<Teacher[]>("/school/teachers")
-      .then((res) => setTeachers(res ?? []))
+    api<{ teachers: Teacher[] }>("/api/portal/teachers")
+      .then((res) => setTeachers(res.teachers ?? []))
       .catch(() => setTeachers([]))
       .finally(() => setLoading(false));
   }
@@ -34,7 +34,7 @@ export default function TeacherIndex() {
 
   async function toggleStatus(teacher: Teacher) {
     try {
-      await api(`/school/teachers/${teacher.id}/toggle`, { method: "PUT" });
+      await api(`/api/portal/teachers/${teacher.id}/toggle`, { method: "PUT" });
       setSuccessMsg("Status updated.");
       loadTeachers();
     } catch {

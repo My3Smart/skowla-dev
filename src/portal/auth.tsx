@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { api, csrf } from "./api";
+import { api, setToken } from "./api";
 
 export type Role = "parent" | "teacher" | "school" | "ppd" | "state" | "country" | "admin";
 
@@ -57,9 +57,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string, remember = false) => {
-      await csrf();
-      // Fortify's login route on the existing Laravel backend
-      await api("/login", { method: "POST", body: { email, password, remember }, form: true });
+      // Token login against the Laravel API (no cookies / CSRF needed)
+      const res = await api<{ token: string; user: AuthUser }>("/api/portal/login", {
+        method: "POST",
+        body: { email, password, remember },
+      });
+      setToken(res.token);
       return await refresh();
     },
     [refresh]
@@ -67,10 +70,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await api("/logout", { method: "POST", body: {}, form: true });
+      await api("/api/portal/logout", { method: "POST", body: {} });
     } catch {
       /* ignore */
     }
+    setToken(null);
     setUser(null);
   }, []);
 

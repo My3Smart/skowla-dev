@@ -13,6 +13,27 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
+/* ---- Sanctum personal access token (works cross-origin, no cookies) ---- */
+
+const TOKEN_KEY = "portal_token";
+
+export function getToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setToken(token: string | null): void {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export async function csrf(): Promise<void> {
   try {
     await fetch(`${API_BASE}/sanctum/csrf-cookie`, { credentials: "include" });
@@ -49,14 +70,16 @@ export async function api<T = unknown>(
     await csrf();
   }
 
-  const token = getCookie("XSRF-TOKEN");
+  const csrfToken = getCookie("XSRF-TOKEN");
+  const bearer = getToken();
   const init: RequestInit = {
     method,
     credentials: "include",
     headers: {
       Accept: "application/json",
       "X-Requested-With": "XMLHttpRequest",
-      ...(token ? { "X-XSRF-TOKEN": token } : {}),
+      ...(csrfToken ? { "X-XSRF-TOKEN": csrfToken } : {}),
+      ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
       ...headers,
     },
   };
@@ -88,6 +111,7 @@ export async function api<T = unknown>(
   }
 
   if (!res.ok) {
+    if (res.status === 401) setToken(null);
     const payload = (data ?? {}) as { message?: string; errors?: Record<string, string[]> };
     throw new ApiError(payload.message || res.statusText, res.status, payload.errors);
   }

@@ -42,7 +42,33 @@ Route::get('/ewallet/parent-by-email', [
 |--------------------------------------------------------------------------
 | Additive endpoints only - the existing Blade routes are unchanged.
 */
+Route::post('portal/login', [\App\Http\Controllers\Api\PortalController::class, 'login']);
+
 Route::middleware(['auth:sanctum'])->prefix('portal')->group(function () {
+    Route::post('/logout', [\App\Http\Controllers\Api\PortalController::class, 'logout']);
+
+    /* forms previously posting to Blade web routes */
+    Route::get('/profile/edit', [\App\Http\Controllers\Api\PortalFormsController::class, 'profileEdit']);
+    Route::post('/profile/update', [\App\Http\Controllers\Api\PortalFormsController::class, 'profileUpdate']);
+    Route::post('/profile/guardian', [\App\Http\Controllers\Api\PortalFormsController::class, 'guardianStore']);
+    Route::get('/profile/guardian/{guardian}/edit', [\App\Http\Controllers\Api\PortalFormsController::class, 'guardianEdit']);
+    Route::put('/profile/guardian/{guardian}', [\App\Http\Controllers\Api\PortalFormsController::class, 'guardianUpdate']);
+
+    Route::get('/remarks/{student}', [\App\Http\Controllers\Api\PortalFormsController::class, 'showRemarks']);
+    Route::post('/remarks/{student}', [\App\Http\Controllers\Api\PortalFormsController::class, 'saveRemarks']);
+
+    Route::get('/class-names', [\App\Http\Controllers\Api\PortalFormsController::class, 'classNames']);
+    Route::post('/class-names', [\App\Http\Controllers\Api\PortalFormsController::class, 'updateClassNames']);
+    Route::post('/students/import', [\App\Http\Controllers\Api\PortalFormsController::class, 'importStudents']);
+
+    Route::get('/students/{student}/attendance', [\App\Http\Controllers\Api\PortalFormsController::class, 'studentAttendance']);
+    Route::get('/schools/{school}/students/management', [\App\Http\Controllers\Api\PortalFormsController::class, 'studentManagement']);
+    Route::get('/class-attendance/{id}/show', [\App\Http\Controllers\Api\PortalFormsController::class, 'classAttendanceShow']);
+
+    Route::get('/teachers/{teacher}/edit', [\App\Http\Controllers\Api\PortalFormsController::class, 'teacherEdit']);
+    Route::put('/teachers/{teacher}/toggle', [\App\Http\Controllers\Api\PortalFormsController::class, 'teacherToggle']);
+    Route::put('/teachers/{teacher}/classes', [\App\Http\Controllers\Api\PortalFormsController::class, 'teacherSyncClasses']);
+
     Route::get('/me', [\App\Http\Controllers\Api\PortalController::class, 'me']);
     Route::get('/dashboard', [\App\Http\Controllers\Api\PortalController::class, 'dashboard']);
 

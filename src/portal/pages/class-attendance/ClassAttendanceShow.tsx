@@ -40,7 +40,7 @@ export default function ClassAttendanceShow() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    api<ShowData>(`/class-attendance/${id}`)
+    api<ShowData>(`/api/portal/class-attendance/${id}/show`)
       .then((res) => {
         if (!cancelled) setData(res);
       })

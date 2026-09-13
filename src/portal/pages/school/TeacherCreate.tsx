@@ -16,7 +16,7 @@ export default function TeacherCreate() {
     const body: Record<string, unknown> = {};
     fd.forEach((v, k) => (body[k] = v));
     try {
-      await api("/school/teachers", { method: "POST", body, form: true });
+      await api("/api/portal/teachers", { method: "POST", body });
       navigate("/school/teachers");
     } catch (err) {
       if (err instanceof ApiError && err.errors) {

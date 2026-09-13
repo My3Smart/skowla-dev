@@ -35,7 +35,7 @@ export default function StudentAttendance() {
 
   useEffect(() => {
     let cancelled = false;
-    api<AttendancePageData>(`/dashboard/student-attendance/${studentId}`)
+    api<AttendancePageData>(`/api/portal/students/${studentId}/attendance`)
       .then((res) => {
         if (!cancelled) setData(res);
       })

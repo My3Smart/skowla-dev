@@ -30,9 +30,9 @@ export default function StudentEdit() {
 
   useEffect(() => {
     let cancelled = false;
-    api<StudentForm>(`/school/students/${id}/edit`)
+    api<{ student: StudentForm }>(`/api/portal/students/${id}`)
       .then((res) => {
-        if (!cancelled) setStudent(res);
+        if (!cancelled) setStudent(res.student);
       })
       .catch(() => {
         if (!cancelled) setStudent(null);
@@ -53,7 +53,7 @@ export default function StudentEdit() {
     e.preventDefault();
     if (!student) return;
     try {
-      await api(`/school/students/${id}/update`, { method: "PUT", body: student, form: true });
+      await api(`/api/portal/students/${id}`, { method: "PUT", body: student });
       navigate(`/school/dashboard`);
     } catch {
       /* errors could be set here if backend returns them */
@@ -63,7 +63,7 @@ export default function StudentEdit() {
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this student?")) return;
     try {
-      await api(`/school/students/${id}`, { method: "DELETE" });
+      await api(`/api/portal/students/${id}`, { method: "DELETE" });
       navigate(`/school/dashboard`);
     } catch {
       /* ignore */
