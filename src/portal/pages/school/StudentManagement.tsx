@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/portal/layouts/AppLayout";
 import { Card } from "@/portal/components/Card";
 import { api } from "@/portal/api";
+import { useAuth } from "@/portal/auth";
 
 interface Student {
   id: number;
@@ -24,7 +25,9 @@ interface ManagementData {
 }
 
 export default function StudentManagement() {
-  const { school: schoolId } = useParams<{ school: string }>();
+  const { user, loading: authLoading } = useAuth();
+  const schoolId = user?.school_id;
+
   const [school, setSchool] = useState<School | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,26 +35,48 @@ export default function StudentManagement() {
   const [showImport, setShowImport] = useState(false);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    console.log("AUTH USER:", user);
+    console.log("SCHOOL ID:", schoolId);
+
+    if (!schoolId) {
+      console.error("Authenticated school user has no school_id:", user);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
-    api<ManagementData>(`/api/portal/schools/${schoolId}/students/management`)
+
+    api<ManagementData>(
+      `/api/portal/schools/${schoolId}/students/management`
+    )
       .then((res) => {
         if (cancelled) return;
+
         setSchool(res.school ?? null);
         setStudents(res.students ?? []);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("Failed to load students:", error);
+
         if (!cancelled) {
           setSchool(null);
           setStudents([]);
         }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
+
     return () => {
       cancelled = true;
     };
-  }, [schoolId]);
+  }, [authLoading, schoolId, user]);
 
   return (
     <AppLayout title="Student Management" role="school">

@@ -177,16 +177,25 @@ class PortalAdminController extends Controller
 
     public function teachers(Request $request)
     {
+        $user = $request->user();
+
         $query = User::role('teacher')->with('roles');
 
-        if ($schoolId = $request->query('school_id')) {
+        if ($user->hasRole('school')) {
+            $query->where('school_id', $user->school_id);
+        } elseif ($schoolId = $request->query('school_id')) {
+            // Keep this for admin filtering by school if needed
             $query->where('school_id', $schoolId);
         }
 
-        $teachers = $query->orderBy('name')->get()
+        $teachers = $query
+            ->orderBy('name')
+            ->get()
             ->map(fn (User $u) => $this->serializeUser($u));
 
-        return response()->json(['teachers' => $teachers]);
+        return response()->json([
+            'teachers' => $teachers,
+        ]);
     }
 
     public function storeTeacher(Request $request)

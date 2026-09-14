@@ -13,6 +13,8 @@ use App\Models\Student;
 use App\Models\StudentRemark;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Guardian;
+use Carbon\Carbon;
 
 /**
  * Additive JSON endpoints for the React portal.
@@ -286,40 +288,143 @@ class PortalDataController extends Controller
     }
 
     private function studentRules(): array
-    {
-        return [
-            'name'          => ['required', 'string', 'max:255'],
-            'ic'            => ['nullable', 'string', 'max:255'],
-            'birth_cert_no' => ['nullable', 'string', 'max:255'],
-            'dob'           => ['nullable', 'date'],
-            'gender'        => ['nullable', 'string', 'max:50'],
-            'grade'         => ['nullable', 'string', 'max:100'],
-            'class_name'    => ['nullable', 'string', 'max:100'],
-            'race'          => ['nullable', 'string', 'max:100'],
-            'religion'      => ['nullable', 'string', 'max:100'],
-            'nationality'   => ['nullable', 'string', 'max:100'],
-            'address'       => ['nullable', 'string'],
-            'age'           => ['nullable', 'integer'],
-            'session'       => ['nullable', 'string', 'max:100'],
-            'status'        => ['nullable', 'string', 'max:100'],
-            'state_id'      => ['nullable', 'exists:states,id'],
-            'district_id'   => ['nullable', 'exists:districts,id'],
-            'school_id'     => ['nullable', 'exists:schools,id'],
-        ];
-    }
+{
+    return [
+        // Student
+        'name'          => ['required', 'string', 'max:255'],
+        'ic'            => ['nullable', 'string', 'max:255'],
+        'birth_cert_no' => ['nullable', 'string', 'max:255'],
+        'dob'           => ['nullable', 'date'],
+        'gender'        => ['nullable', 'string', 'max:50'],
+        'grade'         => ['nullable', 'string', 'max:100'],
+        'class_name'    => ['nullable', 'string', 'max:100'],
+        'race'          => ['nullable', 'string', 'max:100'],
+        'religion'      => ['nullable', 'string', 'max:100'],
+        'nationality'   => ['nullable', 'string', 'max:100'],
+        'address'       => ['nullable', 'string'],
+        'age'           => ['nullable', 'integer'],
+        'session'       => ['nullable', 'string', 'max:100'],
+        'status'        => ['nullable', 'string', 'max:100'],
+        'state_id'      => ['nullable', 'exists:states,id'],
+        'district_id'   => ['nullable', 'exists:districts,id'],
+        'school_id'     => ['nullable', 'exists:schools,id'],
 
-    public function storeStudent(Request $request)
-    {
-        $data = $request->validate($this->studentRules());
-        $student = Student::create($data);
+        // Extra student fields
+        'orphan'        => ['nullable', 'string', 'max:20'],
+        'oku'           => ['nullable', 'string', 'max:20'],
 
-        // keep the parent <-> student link the Blade app relies on
-        if ($request->user()->hasRole('parent')) {
-            $student->parents()->syncWithoutDetaching([$request->user()->id]);
+        // Father
+        'father_name'   => ['nullable', 'string', 'max:255'],
+        'father_ic'     => ['nullable', 'string', 'max:255'],
+        'father_phone'  => ['nullable', 'string', 'max:50'],
+        'father_email'  => ['nullable', 'email', 'max:255'],
+
+        // Mother
+        'mother_name'   => ['nullable', 'string', 'max:255'],
+        'mother_ic'     => ['nullable', 'string', 'max:255'],
+        'mother_phone'  => ['nullable', 'string', 'max:50'],
+        'mother_email'  => ['nullable', 'email', 'max:255'],
+
+        // Guardian
+        'guardian_name'  => ['nullable', 'string', 'max:255'],
+        'guardian_ic'    => ['nullable', 'string', 'max:255'],
+        'guardian_phone' => ['nullable', 'string', 'max:50'],
+        'guardian_email' => ['nullable', 'email', 'max:255'],
+    ];
+}
+
+public function storeStudent(Request $request)
+{
+    $validated = $request->validate($this->studentRules());
+
+    return DB::transaction(function () use ($request, $validated) {
+
+        $user = $request->user();
+
+        $studentData = collect($validated)->only([
+            'name',
+            'ic',
+            'birth_cert_no',
+            'dob',
+            'gender',
+            'grade',
+            'class_name',
+            'race',
+            'religion',
+            'nationality',
+            'address',
+            'age',
+            'session',
+            'status',
+            'state_id',
+            'district_id',
+            'school_id',
+            'orphan',
+            'oku',
+        ])->toArray();
+
+        // Force school_id from logged-in school user
+        if ($user->hasRole('school')) {
+            $studentData['school_id'] = $user->school_id;
         }
 
-        return response()->json(['student' => $this->serializeStudent($student), 'success' => 'Student saved.'], 201);
-    }
+        // Calculate age from DOB if age wasn't submitted
+        if (
+            empty($studentData['age']) &&
+            !empty($studentData['dob'])
+        ) {
+            $studentData['age'] = \Carbon\Carbon::parse(
+                $studentData['dob']
+            )->age;
+        }
+
+        $student = Student::create($studentData);
+
+        if (!empty($validated['father_name'])) {
+            Guardian::create([
+                'student_id' => $student->id,
+                'type'       => 'father',
+                'name'       => $validated['father_name'],
+                'ic'         => $validated['father_ic'] ?? null,
+                'phone'      => $validated['father_phone'] ?? null,
+                'email'      => $validated['father_email'] ?? null,
+            ]);
+        }
+
+        if (!empty($validated['mother_name'])) {
+            Guardian::create([
+                'student_id' => $student->id,
+                'type'       => 'mother',
+                'name'       => $validated['mother_name'],
+                'ic'         => $validated['mother_ic'] ?? null,
+                'phone'      => $validated['mother_phone'] ?? null,
+                'email'      => $validated['mother_email'] ?? null,
+            ]);
+        }
+
+        if (!empty($validated['guardian_name'])) {
+            Guardian::create([
+                'student_id' => $student->id,
+                'type'       => 'guardian',
+                'name'       => $validated['guardian_name'],
+                'ic'         => $validated['guardian_ic'] ?? null,
+                'phone'      => $validated['guardian_phone'] ?? null,
+                'email'      => $validated['guardian_email'] ?? null,
+            ]);
+        }
+
+        if ($user->hasRole('parent')) {
+            $student->parents()->syncWithoutDetaching([
+                $user->id
+            ]);
+        }
+
+        return response()->json([
+            'student' => $this->serializeStudent($student),
+            'success' => 'Student and guardian information saved.',
+        ], 201);
+    });
+}
 
     public function updateStudent(Request $request, Student $student)
     {

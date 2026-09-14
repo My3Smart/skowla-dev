@@ -23,7 +23,7 @@ function menuForRole(role: Role): MenuItem[] {
     case "parent":
       return [
         { label: "Dashboard", to: "/parent/dashboard" },
-        { label: "Attendance", to: "/attendance" },
+        { label: "Attendance", to: "/parent/attendance" },
       ];
     case "teacher":
       return [
@@ -36,7 +36,7 @@ function menuForRole(role: Role): MenuItem[] {
         { label: "Dashboard", to: "/school/dashboard" },
         { label: "Teacher", to: "/school/teachers" },
         { label: "Student Management", to: "/school/students" },
-        { label: "Class Management", to: "/school/class-management" },
+        { label: "Class Management", to: "/school/classes" },
         { label: "Touch", to: "/school/reports" },
       ];
     case "admin":
