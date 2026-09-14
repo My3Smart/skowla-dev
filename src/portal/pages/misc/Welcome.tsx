@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useMetronic } from "@/portal/useMetronic";
-import logoAsset from "@/assets/my3smart-logo.png.asset.json";
+
+const SKOOLA_LOGO = "/assets/media/auth/skoolahdnobg.png";
+const COMPANY_LOGO = "/assets/media/auth/My3SmartDigitalnobg.png";
 
 const HIGHLIGHTS = [
   { value: "1 saat", label: "Imbasan kad RFID untuk merekod kehadiran" },
@@ -117,13 +119,13 @@ export default function Welcome() {
           <nav className="d-flex align-items-center justify-content-between">
             <Link to="/" className="d-flex align-items-center gap-4 text-decoration-none">
               <img
-                src="/assets/media/auth/skoolahd.png"
+                src={SKOOLA_LOGO}
                 alt="Skoola"
                 style={{ height: 56, width: "auto" }}
               />
               <span style={{ width: 1, height: 34, background: "rgba(255,255,255,.25)" }} />
               <img
-                src={logoAsset.url}
+                src={COMPANY_LOGO}
                 alt="My3Smart Digital"
                 style={{ height: 52, width: "auto" }}
               />
@@ -376,12 +378,12 @@ export default function Welcome() {
 
               <div className="d-flex align-items-center gap-4 mb-4">
                 <img
-                  src="/assets/media/auth/skoolahd.png"
+                  src={SKOOLA_LOGO}
                   alt="Skoola"
                   style={{ height: 60, width: "auto" }}
                 />
                 <img
-                  src={logoAsset.url}
+                  src={COMPANY_LOGO}
                   alt="My3Smart Digital"
                   style={{ height: 56, width: "auto" }}
                 />
