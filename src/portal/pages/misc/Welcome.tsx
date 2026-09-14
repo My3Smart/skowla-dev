@@ -64,7 +64,7 @@ const TEAM = [
     image: "/assets/media/team/nuradiana-kamarudin.jpeg",
   },
   {
-    name: "En Shyful Izzuden",
+    name: "En Shyful Izzudeen",
     role: "Managing Director & Creative Director",
     image: "/assets/media/team/en-shyful.jpeg",
   },
@@ -173,7 +173,7 @@ export default function Welcome() {
                 <Link to="/register" className="btn btn-success btn-lg fw-bold px-8">
                   Mula Sekarang
                 </Link>
-                <a href="mailto:info@my3smart.digital" className="btn btn-lg btn-outline btn-outline-dashed btn-color-white fw-semibold px-8">
+                <a href="mailto:my3sssofficial@gmail.com,skoolamy3sss@gmail.com" className="btn btn-lg btn-outline btn-outline-dashed btn-color-white fw-semibold px-8">
                   Minta Demo Percuma
                 </a>
               </div>
@@ -362,7 +362,7 @@ export default function Welcome() {
           <p className="fs-5 mb-8" style={{ color: "#0b3d22", opacity: 0.85 }}>
             Dapatkan demonstrasi percuma dan rundingan pelaksanaan untuk sekolah anda.
           </p>
-          <a href="mailto:info@my3smart.digital" className="btn btn-lg btn-dark fw-bold px-10">
+          <a href="mailto:my3sssofficial@gmail.com,skoolamy3sss@gmail.com" className="btn btn-lg btn-dark fw-bold px-10">
             Hubungi Kami
           </a>
         </div>
@@ -405,7 +405,18 @@ export default function Welcome() {
                 013-534 1977
               </a>
               <a
-                href="mailto:info@my3smart.digital"
+                href="mailto:my3sssofficial@gmail.com"
+                className="d-inline-flex align-items-center text-gray-400 text-hover-success fs-6 text-decoration-none mb-2"
+              >
+                <span className="svg-icon svg-icon-2x svg-icon-gray-400 me-2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor"/>
+                  </svg>
+                </span>
+                my3sssofficial@gmail.com
+              </a>
+              <a
+                href="mailto:skoolamy3sss@gmail.com"
                 className="d-inline-flex align-items-center text-gray-400 text-hover-success fs-6 text-decoration-none"
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-400 me-2">
@@ -413,7 +424,7 @@ export default function Welcome() {
                     <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor"/>
                   </svg>
                 </span>
-                info@my3smart.digital
+                skoolamy3sss@gmail.com
               </a>
             </div>
             <div className="col-md-4 text-md-end">
