@@ -9,8 +9,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      host: "::",
-      port: 8080,
+      host: "0.0.0.0",
+      port: 5173,
+      allowedHosts: ['skoola.my', 'www.skoola.my'],
       proxy: {
         "/api": {
           target: laravel,
