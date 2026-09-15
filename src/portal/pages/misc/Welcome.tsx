@@ -113,7 +113,7 @@ export default function Welcome() {
       {/* Navigasi */}
       <header
         className="w-100 py-5"
-        style={{ background: "#111827", position: "sticky", top: 0, zIndex: 30 }}
+        style={{ background: "#A9CCE3", position: "sticky", top: 0, zIndex: 30 }}
       >
         <div className="container">
           <nav className="d-flex align-items-center justify-content-between">
@@ -121,20 +121,20 @@ export default function Welcome() {
               <img
                 src={SKOOLA_LOGO}
                 alt="Skoola"
-                style={{ height: 56, width: "auto" }}
+                style={{ height: 76, width: "auto" }}
               />
-              <span style={{ width: 1, height: 34, background: "rgba(255,255,255,.25)" }} />
+              <span style={{ width: 1, height: 46, background: "rgba(0,0,0,.15)" }} />
               <img
                 src={COMPANY_LOGO}
                 alt="My3Smart Digital"
-                style={{ height: 52, width: "auto" }}
+                style={{ height: 72, width: "auto" }}
               />
             </Link>
 
             <div className="d-flex align-items-center gap-4">
               <a
                 href="tel:013-5341977"
-                className="d-none d-md-flex align-items-center text-gray-300 text-hover-success fs-6 fw-semibold text-decoration-none"
+                className="d-none d-md-flex align-items-center text-gray-900 text-hover-success fs-6 fw-semibold text-decoration-none"
               >
                 <span className="svg-icon svg-icon-2x svg-icon-white me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,7 +143,7 @@ export default function Welcome() {
                 </span>
                 013-534 1977
               </a>
-              <Link to="/register" className="btn btn-sm btn-color-white btn-active-color-success fw-semibold">
+              <Link to="/register" className="btn btn-sm btn-color-dark btn-active-color-success fw-semibold">
                 Daftar
               </Link>
               <Link to="/login" className="btn btn-sm btn-success fw-bold px-6">
@@ -155,19 +155,19 @@ export default function Welcome() {
       </header>
 
       {/* Hero */}
-      <section style={{ background: "#111827" }} className="pt-10 pb-16">
+      <section style={{ background: "#A9CCE3" }} className="pt-10 pb-16">
         <div className="container">
           <div className="row align-items-center g-10">
             <div className="col-lg-7">
               <span className="badge badge-light-success fw-semibold fs-7 mb-5 px-4 py-2">
                 Teknologi RFID untuk sekolah Malaysia
               </span>
-              <h1 className="text-white fw-bolder mb-5" style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", lineHeight: 1.2 }}>
+              <h1 className="text-dark fw-bolder mb-5" style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", lineHeight: 1.2 }}>
                 Kehadiran pelajar direkod automatik.
                 <br />
                 Ibu bapa tahu dalam masa beberapa saat.
               </h1>
-              <p className="fs-4 text-gray-400 lh-lg mb-8" style={{ maxWidth: 620 }}>
+              <p className="fs-4 text-gray-800 lh-lg mb-8" style={{ maxWidth: 620 }}>
                 Skoola menyatukan kehadiran, kantin tanpa tunai dan laporan sekolah dalam satu sistem
                 yang mudah digunakan oleh ibu bapa, guru dan pentadbir.
               </p>
@@ -175,7 +175,7 @@ export default function Welcome() {
                 <Link to="/register" className="btn btn-success btn-lg fw-bold px-8">
                   Mula Sekarang
                 </Link>
-                <a href="mailto:my3sssofficial@gmail.com,skoolamy3sss@gmail.com" className="btn btn-lg btn-outline btn-outline-dashed btn-color-white fw-semibold px-8">
+                <a href="mailto:my3sssofficial@gmail.com,skoolamy3sss@gmail.com" className="btn btn-lg btn-outline btn-outline-dashed btn-color-dark fw-semibold px-8">
                   Minta Demo Percuma
                 </a>
               </div>
@@ -242,24 +242,24 @@ export default function Welcome() {
       </section>
 
       {/* Cara berfungsi */}
-      <section style={{ background: "#111827" }} className="py-16">
+      <section style={{ background: "#A9CCE3" }} className="py-16">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="fs-2hx fw-bolder text-white mb-3">Tiga langkah sahaja</h2>
-            <p className="fs-5 text-gray-400 mb-0">Sekolah boleh mula menggunakan Skoola dalam masa seminggu.</p>
+            <h2 className="fs-2hx fw-bolder text-dark mb-3">Tiga langkah sahaja</h2>
+            <p className="fs-5 text-gray-800 mb-0">Sekolah boleh mula menggunakan Skoola dalam masa seminggu.</p>
           </div>
           <div className="row g-8">
             {STEPS.map((s) => (
               <div className="col-md-4" key={s.step}>
-                <div className="h-100 p-8 rounded" style={{ background: "rgba(255,255,255,.05)" }}>
+                <div className="h-100 p-8 rounded" style={{ background: "rgba(255,255,255,.45)" }}>
                   <div
                     className="d-inline-flex flex-center rounded-circle mb-5 fw-bolder fs-3"
-                    style={{ width: 52, height: 52, background: "#12CE5D", color: "#111827" }}
+                    style={{ width: 52, height: 52, background: "#12CE5D", color: "#1e1e2d" }}
                   >
                     {s.step}
                   </div>
-                  <h3 className="text-white fw-bold fs-4 mb-3">{s.title}</h3>
-                  <p className="text-gray-400 fs-6 lh-lg mb-0">{s.desc}</p>
+                  <h3 className="text-dark fw-bold fs-4 mb-3">{s.title}</h3>
+                  <p className="text-gray-800 fs-6 lh-lg mb-0">{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -371,7 +371,7 @@ export default function Welcome() {
       </section>
 
       {/* Footer */}
-      <footer style={{ background: "#111827" }} className="py-10">
+      <footer style={{ background: "#A9CCE3" }} className="py-10">
         <div className="container">
           <div className="row align-items-center gy-5">
             <div className="col-md-4">
@@ -380,26 +380,26 @@ export default function Welcome() {
                 <img
                   src={SKOOLA_LOGO}
                   alt="Skoola"
-                  style={{ height: 60, width: "auto" }}
+                  style={{ height: 84, width: "auto" }}
                 />
                 <img
                   src={COMPANY_LOGO}
                   alt="My3Smart Digital"
-                  style={{ height: 56, width: "auto" }}
+                  style={{ height: 80, width: "auto" }}
                 />
               </div>
-              <p className="text-gray-500 fs-7 mb-0">
+              <p className="text-gray-800 fs-7 mb-0">
                 Dikuasakan oleh My3Smart Digital Sdn Bhd
               </p>
             </div>
 
             <div className="col-md-4 text-md-center">
-              <h5 className="text-white fw-bold fs-6 mb-3">Hubungi Kami</h5>
+              <h5 className="text-dark fw-bold fs-6 mb-3">Hubungi Kami</h5>
               <a
                 href="tel:013-5341977"
-                className="d-inline-flex align-items-center text-gray-400 text-hover-success fs-6 text-decoration-none mb-2"
+                className="d-inline-flex align-items-center text-gray-800 text-hover-success fs-6 text-decoration-none mb-2"
               >
-                <span className="svg-icon svg-icon-2x svg-icon-gray-400 me-2">
+                <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5 4H9L11 9L8 11C10.5 15.5 14.5 18 17 19L19 16L24 18V22C24 22.5304 23.7893 23.0391 23.4142 23.4142C23.0391 23.7893 22.5304 24 22 24C17.261 23.6438 12.9133 21.6145 9.73223 18.2678C6.38549 15.0867 4.35624 10.739 4 6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H5Z" fill="currentColor"/>
                   </svg>
@@ -408,9 +408,9 @@ export default function Welcome() {
               </a>
               <a
                 href="mailto:my3sssofficial@gmail.com"
-                className="d-inline-flex align-items-center text-gray-400 text-hover-success fs-6 text-decoration-none mb-2"
+                className="d-inline-flex align-items-center text-gray-800 text-hover-success fs-6 text-decoration-none mb-2"
               >
-                <span className="svg-icon svg-icon-2x svg-icon-gray-400 me-2">
+                <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor"/>
                   </svg>
@@ -419,9 +419,9 @@ export default function Welcome() {
               </a>
               <a
                 href="mailto:skoolamy3sss@gmail.com"
-                className="d-inline-flex align-items-center text-gray-400 text-hover-success fs-6 text-decoration-none"
+                className="d-inline-flex align-items-center text-gray-800 text-hover-success fs-6 text-decoration-none"
               >
-                <span className="svg-icon svg-icon-2x svg-icon-gray-400 me-2">
+                <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor"/>
                   </svg>
@@ -431,20 +431,20 @@ export default function Welcome() {
             </div>
             <div className="col-md-4 text-md-end">
               <div className="d-flex flex-column gap-2">
-                <Link to="/terms" className="fs-7 text-gray-400 text-hover-success text-decoration-none">
+                <Link to="/terms" className="fs-7 text-gray-800 text-hover-success text-decoration-none">
                   Terma
                 </Link>
-                <Link to="/policy" className="fs-7 text-gray-400 text-hover-success text-decoration-none">
+                <Link to="/policy" className="fs-7 text-gray-800 text-hover-success text-decoration-none">
                   Polisi Privasi
                 </Link>
-                <Link to="/login" className="fs-7 text-gray-400 text-hover-success text-decoration-none">
+                <Link to="/login" className="fs-7 text-gray-800 text-hover-success text-decoration-none">
                   Log Masuk
                 </Link>
               </div>
             </div>
           </div>
-          <div className="border-top border-gray-700 mt-8 pt-6 text-center">
-            <span className="fs-7 text-gray-500">
+          <div className="border-top border-gray-500 mt-8 pt-6 text-center">
+            <span className="fs-7 text-gray-800">
               &copy; {new Date().getFullYear()} My3Smart Digital Sdn Bhd. Hak cipta terpelihara.
             </span>
           </div>
