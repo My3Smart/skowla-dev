@@ -112,41 +112,35 @@ export default function Welcome() {
     <div className="d-flex flex-column flex-root bg-body" id="kt_app_root">
       {/* Navigasi */}
       <header
-        className="w-100 py-5"
+        className="w-100 py-2"
         style={{ background: "#A9CCE3", position: "sticky", top: 0, zIndex: 30 }}
       >
         <div className="container">
           <nav className="d-flex align-items-center justify-content-between">
-            <Link to="/" className="d-flex align-items-center gap-4 text-decoration-none">
+            <Link to="/" className="d-flex align-items-center text-decoration-none">
               <img
                 src={SKOOLA_LOGO}
                 alt="Skoola"
-                style={{ height: 76, width: "auto" }}
-              />
-              <span style={{ width: 1, height: 46, background: "rgba(0,0,0,.15)" }} />
-              <img
-                src={COMPANY_LOGO}
-                alt="My3Smart Digital"
-                style={{ height: 72, width: "auto" }}
+                className="skoola-header-logo"
               />
             </Link>
 
-            <div className="d-flex align-items-center gap-4">
+            <div className="d-flex align-items-center gap-2 gap-md-4">
               <a
                 href="tel:013-5341977"
-                className="d-none d-md-flex align-items-center text-gray-900 text-hover-success fs-6 fw-semibold text-decoration-none"
+                className="d-flex d-md-flex align-items-center text-gray-900 skoola-text-hover-yellow fs-7 fw-semibold text-decoration-none"
               >
-                <span className="svg-icon svg-icon-2x svg-icon-white me-2">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <span className="svg-icon svg-icon-1 svg-icon-gray-900 me-1">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5 4H9L11 9L8 11C10.5 15.5 14.5 18 17 19L19 16L24 18V22C24 22.5304 23.7893 23.0391 23.4142 23.4142C23.0391 23.7893 22.5304 24 22 24C17.261 23.6438 12.9133 21.6145 9.73223 18.2678C6.38549 15.0867 4.35624 10.739 4 6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H5Z" fill="currentColor"/>
                   </svg>
                 </span>
-                013-534 1977
+                <span className="d-none d-sm-inline">013-534 1977</span>
               </a>
-              <Link to="/register" className="btn btn-sm btn-color-dark btn-active-color-success fw-semibold">
+              <Link to="/register" className="btn btn-sm btn-color-dark fw-semibold">
                 Daftar
               </Link>
-              <Link to="/login" className="btn btn-sm btn-success fw-bold px-6">
+              <Link to="/login" className="btn btn-sm skoola-btn-yellow fw-bold px-6">
                 Log Masuk
               </Link>
             </div>
@@ -159,7 +153,7 @@ export default function Welcome() {
         <div className="container">
           <div className="row align-items-center g-10">
             <div className="col-lg-7">
-              <span className="badge badge-light-success fw-semibold fs-7 mb-5 px-4 py-2">
+              <span className="badge skoola-badge-yellow fw-semibold fs-7 mb-5 px-4 py-2">
                 Teknologi RFID untuk sekolah Malaysia
               </span>
               <h1 className="text-dark fw-bolder mb-5" style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)", lineHeight: 1.2 }}>
@@ -172,7 +166,7 @@ export default function Welcome() {
                 yang mudah digunakan oleh ibu bapa, guru dan pentadbir.
               </p>
               <div className="d-flex flex-wrap gap-3">
-                <Link to="/register" className="btn btn-success btn-lg fw-bold px-8">
+                <Link to="/register" className="btn skoola-btn-yellow btn-lg fw-bold px-8">
                   Mula Sekarang
                 </Link>
                 <a href="mailto:my3sssofficial@gmail.com,skoolamy3sss@gmail.com" className="btn btn-lg btn-outline btn-outline-dashed btn-color-dark fw-semibold px-8">
@@ -187,13 +181,13 @@ export default function Welcome() {
                   <h3 className="fw-bold fs-3 mb-6">Apa yang anda dapat</h3>
                   {HIGHLIGHTS.map((h) => (
                     <div className="d-flex align-items-start mb-6" key={h.label}>
-                      <div className="fw-bolder fs-2 text-success me-4" style={{ minWidth: 90 }}>
+                      <div className="fw-bolder fs-2 skoola-text-yellow me-4" style={{ minWidth: 90 }}>
                         {h.value}
                       </div>
                       <div className="text-gray-700 fs-6 lh-lg">{h.label}</div>
                     </div>
                   ))}
-                  <Link to="/login" className="btn btn-light-success w-100 fw-bold mt-2">
+                  <Link to="/login" className="btn skoola-btn-yellow-light w-100 fw-bold mt-2">
                     Log masuk ke portal
                   </Link>
                 </div>
@@ -229,9 +223,9 @@ export default function Welcome() {
           <div className="row g-6">
             {SOLUTIONS.map((s) => (
               <div className="col-md-4" key={s.title}>
-                <div className="card h-100 bg-light-success border-0">
+                <div className="card h-100 skoola-bg-yellow-light border-0">
                   <div className="card-body p-8">
-                    <h4 className="fw-bold mb-3 text-success">{s.title}</h4>
+                    <h4 className="fw-bold mb-3 skoola-text-yellow">{s.title}</h4>
                     <p className="text-gray-700 fs-6 lh-lg mb-0">{s.text}</p>
                   </div>
                 </div>
@@ -254,7 +248,7 @@ export default function Welcome() {
                 <div className="h-100 p-8 rounded" style={{ background: "rgba(255,255,255,.45)" }}>
                   <div
                     className="d-inline-flex flex-center rounded-circle mb-5 fw-bolder fs-3"
-                    style={{ width: 52, height: 52, background: "#12CE5D", color: "#1e1e2d" }}
+                    style={{ width: 52, height: 52, background: "#FDB022", color: "#1e1e2d" }}
                   >
                     {s.step}
                   </div>
@@ -303,7 +297,7 @@ export default function Welcome() {
               <div className="card border-0 shadow-lg">
                 <div className="card-body p-10 text-center">
                   <h3 className="fw-bold fs-2 mb-2">Skoola Lifetime Pass</h3>
-                  <div className="fw-bolder text-success mb-1" style={{ fontSize: "3rem" }}>
+                  <div className="fw-bolder skoola-text-yellow mb-1" style={{ fontSize: "3rem" }}>
                     RM25
                   </div>
                   <p className="text-gray-600 fs-6 mb-8">
@@ -312,12 +306,12 @@ export default function Welcome() {
                   <ul className="text-start fs-6 text-gray-700 lh-lg ps-0 mb-8" style={{ listStyle: "none" }}>
                     {PACKAGE_ITEMS.map((item) => (
                       <li className="d-flex align-items-start mb-3" key={item}>
-                        <span className="text-success fw-bolder me-3">✓</span>
+                        <span className="skoola-text-yellow fw-bolder me-3">✓</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
-                  <Link to="/register" className="btn btn-success btn-lg w-100 fw-bold">
+                  <Link to="/register" className="btn skoola-btn-yellow btn-lg w-100 fw-bold">
                     Daftar Sekarang
                   </Link>
                 </div>
@@ -356,12 +350,12 @@ export default function Welcome() {
       </section>
 
       {/* CTA */}
-      <section style={{ background: "#12CE5D" }} className="py-14">
+      <section style={{ background: "#FDB022" }} className="py-14">
         <div className="container text-center">
-          <h2 className="fs-2hx fw-bolder mb-4" style={{ color: "#0b3d22" }}>
+          <h2 className="fs-2hx fw-bolder mb-4" style={{ color: "#1e1e2d" }}>
             Sedia untuk digitalkan sekolah anda?
           </h2>
-          <p className="fs-5 mb-8" style={{ color: "#0b3d22", opacity: 0.85 }}>
+          <p className="fs-5 mb-8" style={{ color: "#1e1e2d", opacity: 0.85 }}>
             Dapatkan demonstrasi percuma dan rundingan pelaksanaan untuk sekolah anda.
           </p>
           <a href="mailto:my3sssofficial@gmail.com,skoolamy3sss@gmail.com" className="btn btn-lg btn-dark fw-bold px-10">
@@ -374,18 +368,13 @@ export default function Welcome() {
       <footer style={{ background: "#A9CCE3" }} className="py-10">
         <div className="container">
           <div className="row align-items-center gy-5">
-            <div className="col-md-4">
+            <div className="col-md-4 text-md-center">
 
-              <div className="d-flex align-items-center gap-4 mb-4">
-                <img
-                  src={SKOOLA_LOGO}
-                  alt="Skoola"
-                  style={{ height: 84, width: "auto" }}
-                />
+              <div className="d-flex justify-content-md-center mb-4">
                 <img
                   src={COMPANY_LOGO}
                   alt="My3Smart Digital"
-                  style={{ height: 80, width: "auto" }}
+                  style={{ width: 160, height: "auto" }}
                 />
               </div>
               <p className="text-gray-800 fs-7 mb-0">
@@ -397,7 +386,7 @@ export default function Welcome() {
               <h5 className="text-dark fw-bold fs-6 mb-3">Hubungi Kami</h5>
               <a
                 href="tel:013-5341977"
-                className="d-inline-flex align-items-center text-gray-800 text-hover-success fs-6 text-decoration-none mb-2"
+                className="d-inline-flex align-items-center text-gray-800 skoola-text-hover-yellow fs-6 text-decoration-none mb-2"
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -408,7 +397,7 @@ export default function Welcome() {
               </a>
               <a
                 href="mailto:my3sssofficial@gmail.com"
-                className="d-inline-flex align-items-center text-gray-800 text-hover-success fs-6 text-decoration-none mb-2"
+                className="d-inline-flex align-items-center text-gray-800 skoola-text-hover-yellow fs-6 text-decoration-none mb-2"
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -419,7 +408,7 @@ export default function Welcome() {
               </a>
               <a
                 href="mailto:skoolamy3sss@gmail.com"
-                className="d-inline-flex align-items-center text-gray-800 text-hover-success fs-6 text-decoration-none"
+                className="d-inline-flex align-items-center text-gray-800 skoola-text-hover-yellow fs-6 text-decoration-none"
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -431,13 +420,13 @@ export default function Welcome() {
             </div>
             <div className="col-md-4 text-md-end">
               <div className="d-flex flex-column gap-2">
-                <Link to="/terms" className="fs-7 text-gray-800 text-hover-success text-decoration-none">
+                <Link to="/terms" className="fs-7 text-gray-800 skoola-text-hover-yellow text-decoration-none">
                   Terma
                 </Link>
-                <Link to="/policy" className="fs-7 text-gray-800 text-hover-success text-decoration-none">
+                <Link to="/policy" className="fs-7 text-gray-800 skoola-text-hover-yellow text-decoration-none">
                   Polisi Privasi
                 </Link>
-                <Link to="/login" className="fs-7 text-gray-800 text-hover-success text-decoration-none">
+                <Link to="/login" className="fs-7 text-gray-800 skoola-text-hover-yellow text-decoration-none">
                   Log Masuk
                 </Link>
               </div>

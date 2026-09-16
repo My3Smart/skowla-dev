@@ -26,3 +26,50 @@ html body.portal-login-page {
     background-image: url("/assets/media/auth/bg10-dark.jpeg") !important;
   }
 }
+
+/* Landing page yellow accent — replaces Metronic green */
+.skoola-btn-yellow {
+  background-color: #FDB022 !important;
+  border-color: #FDB022 !important;
+  color: #fff !important;
+}
+.skoola-btn-yellow:hover {
+  background-color: #E5A024 !important;
+  border-color: #E5A024 !important;
+}
+.skoola-btn-yellow-light {
+  background-color: rgba(253, 176, 34, 0.12) !important;
+  color: #B4730A !important;
+}
+.skoola-btn-yellow-light:hover {
+  background-color: rgba(253, 176, 34, 0.2) !important;
+}
+.skoola-text-yellow {
+  color: #E5A024 !important;
+}
+.skoola-bg-yellow-light {
+  background-color: rgba(253, 176, 34, 0.12) !important;
+}
+.skoola-badge-yellow {
+  background-color: rgba(253, 176, 34, 0.15) !important;
+  color: #B4730A !important;
+}
+.skoola-text-hover-yellow:hover {
+  color: #E5A024 !important;
+}
+
+/* Responsive Skoola header logo */
+.skoola-header-logo {
+  width: 150px;
+  height: auto;
+}
+@media (max-width: 991.98px) {
+  .skoola-header-logo {
+    width: 120px;
+  }
+}
+@media (max-width: 575.98px) {
+  .skoola-header-logo {
+    width: 100px;
+  }
+}
