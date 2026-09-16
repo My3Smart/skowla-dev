@@ -46,16 +46,19 @@ const STEPS = [
     step: "1",
     title: "Daftar & terima kad RFID",
     desc: "Setiap pelajar menerima kad pintar Skoola yang terikat pada profil mereka.",
+    image: "/assets/media/auth/card.png",
   },
   {
     step: "2",
     title: "Imbas di sekolah",
     desc: "Imbasan di pintu masuk merekod kehadiran; imbasan di kantin merekod pembelian.",
+    image: "/assets/media/auth/card-tap.png",
   },
   {
     step: "3",
     title: "Pantau secara langsung",
-    desc: "Ibu bapa, guru dan pentadbir melihat kemas kini yang sama pada masa sebenar.",
+    desc: "Ibu bapa, guru dan pentadbir melihat kem kini yang sama pada masa sebenar.",
+    image: "/assets/media/auth/dashboard.png",
   },
 ];
 
@@ -132,7 +135,7 @@ export default function Welcome() {
               >
                 <span className="svg-icon svg-icon-1 svg-icon-gray-900 me-1">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 4H9L11 9L8 11C10.5 15.5 14.5 18 17 19L19 16L24 18V22C24 22.5304 23.7893 23.0391 23.4142 23.4142C23.0391 23.7893 22.5304 24 22 24C17.261 23.6438 12.9133 21.6145 9.73223 18.2678C6.38549 15.0867 4.35624 10.739 4 6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H5Z" fill="currentColor"/>
+                    <path d="M5 4H9L11 9L8 11C10.5 15.5 14.5 18 17 19L19 16L24 18V22C24 22.5304 23.7893 23.0391 23.4142 23.4142C23.0391 23.7893 22.5304 24 22 24C17.261 23.6438 12.9133 21.6145 9.73223 18.2678C6.38549 15.0867 4.35624 10.739 4 6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H5Z" fill="currentColor" />
                   </svg>
                 </span>
                 <span className="d-none d-sm-inline">013-534 1977</span>
@@ -239,21 +242,60 @@ export default function Welcome() {
       <section style={{ background: "#A9CCE3" }} className="py-16">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="fs-2hx fw-bolder text-dark mb-3">Tiga langkah sahaja</h2>
-            <p className="fs-5 text-gray-800 mb-0">Sekolah boleh mula menggunakan Skoola dalam masa seminggu.</p>
+            <h2 className="fs-2hx fw-bolder text-dark mb-3">
+              Tiga langkah sahaja
+            </h2>
+
+            <p className="fs-5 text-gray-800 mb-0">
+              Sekolah boleh mula menggunakan Skoola dalam masa seminggu.
+            </p>
           </div>
+
           <div className="row g-8">
             {STEPS.map((s) => (
               <div className="col-md-4" key={s.step}>
-                <div className="h-100 p-8 rounded" style={{ background: "rgba(255,255,255,.45)" }}>
+                <div
+                  className="h-100 p-8 rounded text-center"
+                  style={{ background: "rgba(255,255,255,.45)" }}
+                >
+                  {/* Image */}
                   <div
-                    className="d-inline-flex flex-center rounded-circle mb-5 fw-bolder fs-3"
-                    style={{ width: 52, height: 52, background: "#FDB022", color: "#1e1e2d" }}
+                    className="d-flex align-items-center justify-content-center gap-5 mb-6"
+                    style={{ height: "150px" }}
                   >
-                    {s.step}
+                    {/* Step number */}
+                    <div
+                      className="d-flex flex-center rounded-circle fw-bolder fs-3 flex-shrink-0"
+                      style={{
+                        width: 52,
+                        height: 52,
+                        background: "#FDB022",
+                        color: "#1e1e2d",
+                      }}
+                    >
+                      {s.step}
+                    </div>
+
+                    {/* Image */}
+                    <img
+                      src={s.image}
+                      alt={s.title}
+                      style={{
+                        width: "100%",
+                        maxWidth: "170px",
+                        height: "140px",
+                        objectFit: "contain",
+                      }}
+                    />
                   </div>
-                  <h3 className="text-dark fw-bold fs-4 mb-3">{s.title}</h3>
-                  <p className="text-gray-800 fs-6 lh-lg mb-0">{s.desc}</p>
+
+                  <h3 className="text-dark fw-bold fs-4 mb-3 text-center">
+                    {s.title}
+                  </h3>
+
+                  <p className="text-gray-800 fs-6 lh-lg mb-0 text-center">
+                    {s.desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -390,7 +432,7 @@ export default function Welcome() {
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 4H9L11 9L8 11C10.5 15.5 14.5 18 17 19L19 16L24 18V22C24 22.5304 23.7893 23.0391 23.4142 23.4142C23.0391 23.7893 22.5304 24 22 24C17.261 23.6438 12.9133 21.6145 9.73223 18.2678C6.38549 15.0867 4.35624 10.739 4 6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H5Z" fill="currentColor"/>
+                    <path d="M5 4H9L11 9L8 11C10.5 15.5 14.5 18 17 19L19 16L24 18V22C24 22.5304 23.7893 23.0391 23.4142 23.4142C23.0391 23.7893 22.5304 24 22 24C17.261 23.6438 12.9133 21.6145 9.73223 18.2678C6.38549 15.0867 4.35624 10.739 4 6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H5Z" fill="currentColor" />
                   </svg>
                 </span>
                 013-534 1977
@@ -401,7 +443,7 @@ export default function Welcome() {
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor"/>
+                    <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor" />
                   </svg>
                 </span>
                 my3sssofficial@gmail.com
@@ -412,7 +454,7 @@ export default function Welcome() {
               >
                 <span className="svg-icon svg-icon-2x svg-icon-gray-800 me-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor"/>
+                    <path d="M2 6C2 4.89543 2.89543 4 4 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6ZM4 6L12 11L20 6H4ZM4 8V18H20V8L12 13L4 8Z" fill="currentColor" />
                   </svg>
                 </span>
                 skoolamy3sss@gmail.com
