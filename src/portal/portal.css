@@ -9,11 +9,16 @@ html body #kt_app_header .app-header-menu .menu > .menu-item.here > .menu-link .
   color: var(--bs-primary, #1b84ff) !important;
 }
 
-html body.portal-login-page {
+/* html body.portal-login-page {
   background-image: url("/assets/media/auth/bg10.jpeg") !important;
   background-size: cover !important;
   background-position: center !important;
   background-attachment: fixed !important;
+} */
+
+html body.portal-login-page {
+  background-color: #FFEFD6 !important;
+  background-image: none !important;
 }
 
 .portal-social-button {
@@ -21,9 +26,16 @@ html body.portal-login-page {
   padding: 10px !important;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   html[data-bs-theme="dark"] body.portal-login-page {
     background-image: url("/assets/media/auth/bg10-dark.jpeg") !important;
+  }
+} */
+
+@media (prefers-color-scheme: dark) {
+  html[data-bs-theme="dark"] body.portal-login-page {
+    background-color: #FFEFD6 !important;
+    background-image: none !important;
   }
 }
 

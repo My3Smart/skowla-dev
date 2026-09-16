@@ -64,10 +64,10 @@ export default function Login() {
         <div className="d-flex flex-lg-row-fluid">
           <div className="d-flex flex-column flex-center pb-0 pb-lg-10 p-10 w-100">
             <img
-              className="theme-light-show mx-auto mw-100 w-500px w-lg-800px mb-0"
-              src="/assets/media/auth/skoolahd.png"
-              alt=""
-            />
+  className="theme-light-show mx-auto mw-100 w-400px w-lg-500px mb-0"
+  src="/assets/media/auth/skoola-new.jpeg"
+  alt="Skoola Logo"
+/>
             <img
               className="theme-dark-show mx-auto mw-100 w-150px w-lg-300px mb-10 mb-lg-20"
               src="/assets/media/auth/agency-dark.png"
@@ -82,16 +82,25 @@ export default function Login() {
 
         {/* begin::Body */}
         <div className="d-flex flex-column-fluid flex-lg-row-auto justify-content-center justify-content-lg-end p-12">
-          <div className="bg-body d-flex flex-column flex-center rounded-4 w-md-600px p-10">
+          <div
+            className="d-flex flex-column flex-center rounded-4 w-md-600px p-10"
+            style={{ backgroundColor: "#FFEFD6" }}
+          >
             <div className="d-flex flex-center flex-column align-items-stretch h-lg-100 w-md-400px">
               <div className="d-flex flex-center flex-column flex-column-fluid pb-15 pb-lg-20">
                 <form className="form w-100" onSubmit={handleSubmit}>
                   {/* begin::Heading */}
                   <div className="text-center mb-11">
                     {error && (
-                      <div className="alert alert-danger text-center mt-3">{error}</div>
+                      <div className="alert alert-danger text-center mt-3">
+                        {error}
+                      </div>
                     )}
-                    <h1 className="text-dark fw-bolder mb-3">Log In</h1>
+
+                    <h1 className="text-dark fw-bolder mb-3">
+                      Log In
+                    </h1>
+
                     <div className="text-gray-500 fw-semibold fs-6">
                       Log in here to view dashboard and other features!
                     </div>
@@ -109,6 +118,7 @@ export default function Login() {
                       autoComplete="username"
                     />
                   </div>
+
                   <div className="fv-row mb-3">
                     <input
                       type="password"
@@ -122,6 +132,7 @@ export default function Login() {
 
                   <div className="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8">
                     <div />
+
                     <a href="/forgot-password" className="link-primary">
                       Forgot Password ?
                     </a>
@@ -140,7 +151,9 @@ export default function Login() {
                           <span className="spinner-border spinner-border-sm align-middle ms-2" />
                         </span>
                       ) : (
-                        <span className="indicator-label">Log In</span>
+                        <span className="indicator-label">
+                          Log In
+                        </span>
                       )}
                     </button>
                   </div>
@@ -148,7 +161,10 @@ export default function Login() {
                   <a
                     href="/auth/google"
                     className="btn w-100 d-flex align-items-center justify-content-center gap-2 border bg-white"
-                    style={{ borderRadius: 8, padding: 10 }}
+                    style={{
+                      borderRadius: 8,
+                      padding: 10,
+                    }}
                   >
                     <img
                       src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
@@ -156,13 +172,21 @@ export default function Login() {
                       width={20}
                       height={20}
                     />
-                    <span className="fw-semibold text-dark">Continue with Google</span>
+
+                    <span className="fw-semibold text-dark">
+                      Continue with Google
+                    </span>
                   </a>
 
                   <a
                     href="/auth/facebook"
                     className="btn w-100 d-flex align-items-center justify-content-center gap-2 border"
-                    style={{ backgroundColor: "#fff", color: "#1877F2", borderRadius: 8, padding: 10 }}
+                    style={{
+                      backgroundColor: "#fff",
+                      color: "#1877F2",
+                      borderRadius: 8,
+                      padding: 10,
+                    }}
                   >
                     <img
                       src="https://www.svgrepo.com/show/475647/facebook-color.svg"
@@ -170,7 +194,10 @@ export default function Login() {
                       width={20}
                       height={20}
                     />
-                    <span className="fw-semibold">Continue with Facebook</span>
+
+                    <span className="fw-semibold">
+                      Continue with Facebook
+                    </span>
                   </a>
 
                   <div className="text-gray-500 text-center fw-semibold fs-6 mt-4">
@@ -187,6 +214,6 @@ export default function Login() {
         {/* end::Body */}
       </div>
       {/* end::Authentication - Sign-in */}
-    </div>
+    </div >
   );
 }
