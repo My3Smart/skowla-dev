@@ -153,7 +153,7 @@ export default function ClassManagement() {
 
             <hr className="my-4" />
             <div className="text-center">
-              <Link to="/school/class/edit-class/edit" className="btn btn-primary rounded-pill">
+              <Link to="/school/classes/:id/edit" className="btn btn-primary rounded-pill">
                 Edit Class Names
               </Link>
             </div>

@@ -72,7 +72,7 @@ export default function Register() {
       return;
     }
     const t = window.setTimeout(() => {
-      api<StudentInfo[]>(`/get-students-by-parent-ic?ic=${encodeURIComponent(ic)}`)
+      api<StudentInfo[]>(`/api/portal/get-students-by-parent-ic?ic=${encodeURIComponent(ic)}`)
         .then((data) => setStudents(data))
         .catch(() => setStudents(null));
     }, 500);
@@ -110,8 +110,8 @@ export default function Register() {
     });
 
     try {
-      await api("/register", { method: "POST", body, form: true });
-      navigate("/dashboard");
+      await api("/portal/register", { method: "POST", body, form: true });
+      navigate("/login");
     } catch (err) {
       if (err instanceof ApiError && err.errors) {
         setErrors(err.errors);

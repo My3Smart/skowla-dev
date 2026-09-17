@@ -42,6 +42,17 @@ Route::get('/ewallet/parent-by-email', [
 |--------------------------------------------------------------------------
 | Additive endpoints only - the existing Blade routes are unchanged.
 */
+
+Route::post('/portal/register', [
+    \App\Http\Controllers\Api\PortalController::class,
+    'register'
+]);
+
+Route::get('/portal/get-students-by-parent-ic', [
+    \App\Http\Controllers\Api\PortalController::class,
+    'getStudentsByParentIc'
+]);
+
 Route::post('portal/login', [\App\Http\Controllers\Api\PortalController::class, 'login']);
 
 Route::middleware(['auth:sanctum'])->prefix('portal')->group(function () {

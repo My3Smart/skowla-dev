@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\StudentAttendance;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Guardian;
 
 /**
  * Read-only JSON endpoints used by the React portal.
@@ -22,7 +23,7 @@ class PortalController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'email'    => ['required', 'string'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
@@ -30,10 +31,10 @@ class PortalController extends Controller
             ->orWhere('username', $data['email'])
             ->first();
 
-        if (! $user || ! \Illuminate\Support\Facades\Hash::check($data['password'], $user->password)) {
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'These credentials do not match our records.',
-                'errors'  => ['email' => ['These credentials do not match our records.']],
+                'errors' => ['email' => ['These credentials do not match our records.']],
             ], 422);
         }
 
@@ -41,15 +42,47 @@ class PortalController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user'  => [
-                'id'        => $user->id,
-                'name'      => $user->name,
-                'email'     => $user->email,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
                 'school_id' => $user->school_id,
-                'roles'     => $user->getRoleNames(),
-                'role'      => $user->getRoleNames()->first(),
+                'roles' => $user->getRoleNames(),
+                'role' => $user->getRoleNames()->first(),
             ],
         ]);
+    }
+
+    public function getStudentsByParentIc(Request $request)
+    {
+        $request->validate([
+            'ic' => ['required', 'string', 'size:12'],
+        ]);
+
+        // Find all guardian records matching the parent's IC
+        $studentIds = \App\Models\Guardian::where('ic', $request->ic)
+            ->pluck('student_id')
+            ->filter()
+            ->unique();
+
+        // No student linked to this IC
+        if ($studentIds->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // Get the linked students
+        $students = Student::whereIn('id', $studentIds)
+            ->get()
+            ->map(function ($student) {
+                return [
+                    'name' => $student->name,
+                    'ic' => $student->ic,
+                    'grade' => $student->grade,
+                    'class_name' => $student->class_name,
+                ];
+            });
+
+        return response()->json($students);
     }
 
     public function logout(Request $request)
@@ -67,15 +100,15 @@ class PortalController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'id'         => $user->id,
-            'name'       => $user->name,
-            'email'      => $user->email,
-            'phone_num'  => $user->phone_num,
-            'ic'         => $user->ic,
-            'school_id'  => $user->school_id,
-            'state_id'   => $user->state_id,
-            'roles'      => $user->getRoleNames(),
-            'role'       => $user->getRoleNames()->first(),
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone_num' => $user->phone_num,
+            'ic' => $user->ic,
+            'school_id' => $user->school_id,
+            'state_id' => $user->state_id,
+            'roles' => $user->getRoleNames(),
+            'role' => $user->getRoleNames()->first(),
         ]);
     }
 
@@ -97,12 +130,12 @@ class PortalController extends Controller
         $presentToday = (clone $attendanceQuery)->whereDate('created_at', $today)->count();
 
         return response()->json([
-            'role'           => $role,
+            'role' => $role,
             'total_students' => $totalStudents,
-            'total_schools'  => School::count(),
-            'total_users'    => User::count(),
-            'present_today'  => $presentToday,
-            'absent_today'   => max($totalStudents - $presentToday, 0),
+            'total_schools' => School::count(),
+            'total_users' => User::count(),
+            'present_today' => $presentToday,
+            'absent_today' => max($totalStudents - $presentToday, 0),
         ]);
     }
 }
