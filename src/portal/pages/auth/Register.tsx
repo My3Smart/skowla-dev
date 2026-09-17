@@ -110,7 +110,7 @@ export default function Register() {
     });
 
     try {
-      await api("/portal/register", { method: "POST", body, form: true });
+      await api("/api/portal/register", { method: "POST", body, form: true });
       navigate("/login");
     } catch (err) {
       if (err instanceof ApiError && err.errors) {
