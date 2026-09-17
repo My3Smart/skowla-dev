@@ -16,19 +16,32 @@ use Illuminate\Validation\Rule;
 class PortalAdminController extends Controller
 {
     private function serializeUser(User $user): array
-    {
-        return [
-            'id'        => $user->id,
-            'name'      => $user->name,
-            'username'  => $user->username,
-            'email'     => $user->email,
-            'phone_num' => $user->phone_num,
-            'ic'        => $user->ic,
-            'status'    => $user->status,
-            'school_id' => $user->school_id,
-            'roles'     => $user->getRoleNames(),
-        ];
-    }
+{
+    return [
+        'id'        => $user->id,
+        'name'      => $user->name,
+        'username'  => $user->username,
+        'email'     => $user->email,
+        'phone_num' => $user->phone_num,
+        'ic'        => $user->ic,
+        'address'   => $user->address,
+        'status'    => $user->status,
+        'school_id' => $user->school_id,
+        'roles'     => $user->getRoleNames(),
+
+        'classes' => $user->relationLoaded('classes')
+            ? $user->classes->map(function ($class) {
+                return [
+                    'id'         => $class->id,
+                    'class_name' => $class->class_name,
+                    'grade'      => $class->grade ? [
+                        'grade_name' => $class->grade->grade_name,
+                    ] : null,
+                ];
+            })->values()
+            : [],
+    ];
+}
 
     /* ------------------------------ users ------------------------------ */
 
@@ -179,7 +192,11 @@ class PortalAdminController extends Controller
     {
         $user = $request->user();
 
-        $query = User::role('teacher')->with('roles');
+        $query = User::role('teacher')
+         ->with([
+             'roles',
+             'classes.grade',
+         ]);
 
         if ($user->hasRole('school')) {
             $query->where('school_id', $user->school_id);
