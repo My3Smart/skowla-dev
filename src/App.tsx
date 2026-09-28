@@ -60,12 +60,18 @@ import Policy from "./portal/pages/misc/Policy";
 const LoginRedirect = () => {
   const hostname = window.location.hostname;
 
-  if (hostname.endsWith(".skowla.com")) {
+  if (
+    hostname === "skowla.com" ||
+    hostname.endsWith(".skowla.com")
+  ) {
     window.location.href = "https://login.skowla.com/";
     return null;
   }
 
-  if (hostname.endsWith(".skoola.my")) {
+  if (
+    hostname === "skoola.my" ||
+    hostname.endsWith(".skoola.my")
+  ) {
     window.location.href = "https://login.skoola.my/";
     return null;
   }
