@@ -57,6 +57,22 @@ import Welcome from "./portal/pages/misc/Welcome";
 import Terms from "./portal/pages/misc/Terms";
 import Policy from "./portal/pages/misc/Policy";
 
+const LoginRedirect = () => {
+  const hostname = window.location.hostname;
+
+  if (hostname.endsWith(".skowla.com")) {
+    window.location.href = "https://login.skowla.com/";
+    return null;
+  }
+
+  if (hostname.endsWith(".skoola.my")) {
+    window.location.href = "https://login.skoola.my/";
+    return null;
+  }
+
+  return <Navigate to="/login" replace />;
+};
+
 const App = () => {
   const hostname = window.location.hostname;
 
@@ -76,7 +92,7 @@ const App = () => {
           <Routes>
 
             {/* Public / auth */}
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginRedirect />} />
             <Route path="/school-login" element={<SchoolLogin />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
