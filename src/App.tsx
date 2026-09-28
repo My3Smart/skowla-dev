@@ -79,12 +79,38 @@ const LoginRedirect = () => {
   return <Navigate to="/login" replace />;
 };
 
+const SchoolLoginRedirect = () => {
+  const hostname = window.location.hostname;
+
+  if (
+    hostname === "skowla.com" ||
+    hostname.endsWith(".skowla.com")
+  ) {
+    window.location.href = "https://school.skowla.com/";
+    return null;
+  }
+
+  if (
+    hostname === "skoola.my" ||
+    hostname.endsWith(".skoola.my")
+  ) {
+    window.location.href = "https://school.skoola.my/";
+    return null;
+  }
+
+  return <Navigate to="/school-login" replace />;
+};
+
 const App = () => {
   const hostname = window.location.hostname;
 
   const isLoginSubdomain =
     hostname === "login.skowla.com" ||
     hostname === "login.skoola.my";
+
+  const isSchoolLoginSubdomain =
+    hostname === "school.skowla.com" ||
+    hostname === "school.skoola.my";
 
   return (
     <BrowserRouter>
@@ -94,12 +120,16 @@ const App = () => {
           <Routes>
             <Route path="*" element={<Login />} />
           </Routes>
+        ) : isSchoolLoginSubdomain ? (
+          <Routes>
+            <Route path="*" element={<SchoolLogin />} />
+          </Routes>
         ) : (
           <Routes>
 
             {/* Public / auth */}
             <Route path="/login" element={<LoginRedirect />} />
-            <Route path="/school-login" element={<SchoolLogin />} />
+            <Route path="/school-login" element={<SchoolLoginRedirect />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
