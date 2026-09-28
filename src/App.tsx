@@ -72,7 +72,7 @@ const LoginRedirect = () => {
     hostname === "skoola.my" ||
     hostname.endsWith(".skoola.my")
   ) {
-    window.location.href = "https://login.skoola.my/";
+    window.location.href = "https://login.skowla.com/";
     return null;
   }
 
