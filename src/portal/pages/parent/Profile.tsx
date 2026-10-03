@@ -43,17 +43,48 @@ export default function Profile() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this guardian?")) return;
-    try {
-      await api(`/api/portal/profile/guardian/${id}`, { method: "DELETE" });
-      setMessage({ type: "success", text: "Guardian deleted successfully." });
-      setData((prev) =>
-        prev ? { ...prev, guardians: prev.guardians.filter((g) => g.id !== id) } : prev
-      );
-    } catch {
-      setMessage({ type: "error", text: "Unable to delete guardian." });
-    }
-  };
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this guardian?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    console.log("Deleting guardian ID:", id);
+
+    const response = await api<{ success: boolean; message?: string }>(
+      `/api/portal/profile/guardian/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    console.log("Delete response:", response);
+
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            guardians: prev.guardians.filter(
+              (guardian) => guardian.id !== id
+            ),
+          }
+        : prev
+    );
+
+    setMessage({
+      type: "success",
+      text: response?.message ?? "Guardian deleted successfully.",
+    });
+  } catch (error) {
+    console.error("DELETE GUARDIAN ERROR:", error);
+
+    setMessage({
+      type: "error",
+      text: "Unable to delete guardian.",
+    });
+  }
+};
 
   if (loading) {
     return (
@@ -134,7 +165,7 @@ export default function Profile() {
                   <div className="card-title m-0">
                     <h3 className="fw-bold m-0">Profile details</h3>
                   </div>
-                  <Link to="/profile/edit" className="btn btn-sm btn-primary align-self-center">
+                  <Link to="/parent/profile/edit" className="btn btn-sm btn-primary align-self-center">
                     Edit profile
                   </Link>
                 </div>
@@ -237,7 +268,7 @@ export default function Profile() {
                       <h3 className="fw-bold m-0">List of additional guardians</h3>
                     </div>
                     <Link
-                      to="/profile/guardian/create"
+                      to="/parent/guardian/add"
                       className="btn btn-sm btn-primary align-self-center"
                     >
                       Add guardian
@@ -275,13 +306,13 @@ export default function Profile() {
                                   <td className="text-center d-flex justify-content-center">
                                     <div className="d-flex gap-2">
                                       <Link
-                                        to={`/profile/guardian/${guardian.id}`}
+                                        to={`/parent/guardian/${guardian.id}`}
                                         className="btn btn-sm btn-light align-self-center"
                                       >
                                         View
                                       </Link>
                                       <Link
-                                        to={`/profile/guardian/${guardian.id}/edit`}
+                                        to={`/parent/guardian/${guardian.id}/edit`}
                                         className="btn btn-sm btn-primary me-1"
                                       >
                                         Edit

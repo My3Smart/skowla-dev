@@ -120,61 +120,153 @@ class PortalParentController extends Controller
 
     /** Parent profile + additional guardians. */
     public function profile(Request $request)
-    {
-        $parent = $request->user();
-        $guardians = $parent->additionalGuardians();
+{
+    $parent = $request->user();
 
-        return response()->json([
-            'parent' => [
-                'id'           => $parent->id,
-                'name'         => $parent->name,
-                'email'        => $parent->email,
-                'ic'           => $parent->ic,
-                'phone_num'    => $parent->phone_num,
-                'occupation'   => $parent->occupation,
-                'relationship' => $parent->relationship,
-                'username'     => $parent->username,
-                'address'      => $parent->address,
-            ],
-            'state'     => $parent->state ? ['name' => $parent->state->name] : null,
-            'citie'     => $parent->citie ? ['name' => $parent->citie->name] : null,
-            'postcode'  => $parent->postcode ? ['name' => $parent->postcode->name] : null,
-            'guardians' => collect($guardians)->map(fn ($g) => $this->serializeGuardian($g))->values(),
-        ]);
-    }
+    $guardians = $parent->additionalGuardians();
+
+    return response()->json([
+        'parent' => [
+            'id'           => $parent->id,
+            'name'         => $parent->name,
+            'email'        => $parent->email,
+            'ic'           => $parent->ic,
+            'phone_num'    => $parent->phone_num,
+            'occupation'   => $parent->occupation,
+            'relationship' => $parent->relationship,
+            'username'     => $parent->username,
+            'address'      => $parent->address,
+        ],
+
+        'state' => $parent->state
+            ? ['name' => $parent->state->name]
+            : null,
+
+        'citie' => $parent->citie
+            ? ['name' => $parent->citie->name]
+            : null,
+
+        'postcode' => $parent->postcode
+            ? ['name' => $parent->postcode->name]
+            : null,
+
+        'guardians' => collect($guardians)
+            ->map(fn ($g) => [
+                'id'        => $g->id,
+                'name'      => $g->name,
+                'phone_num' => $g->phone ?? null,
+                'email'     => $g->email ?? null,
+            ])
+            ->values(),
+    ]);
+}
 
     /** Single guardian. */
     public function showGuardian(Request $request, $guardian)
-    {
-        $model = User::find($guardian);
+{
+    // $guardian = guardians.id
+    $guardianRecord = DB::table('guardians')
+        ->where('id', $guardian)
+        ->first();
 
-        if (! $model) {
-            return response()->json(['message' => 'Guardian not found.'], 404);
-        }
-
+    if (! $guardianRecord) {
         return response()->json([
-            'guardian' => $this->serializeGuardian($model),
-            'state'    => $model->state?->name ?? '',
-            'city'     => $model->citie?->name ?? '',
-            'postcode' => $model->postcode?->name ?? '',
-        ]);
+            'message' => 'Guardian not found.'
+        ], 404);
     }
+
+    // Find full user details through email
+    $user = User::where('email', $guardianRecord->email)->first();
+
+    if (! $user) {
+        return response()->json([
+            'message' => 'Guardian user account not found.'
+        ], 404);
+    }
+
+    // Get full user details
+    $guardianData = $this->serializeGuardian($user);
+
+    // IMPORTANT:
+    // Override users.id with guardians.id
+    $guardianData['id'] = $guardianRecord->id;
+
+    return response()->json([
+        'guardian' => $guardianData,
+        'state'    => $user->state?->name ?? '',
+        'city'     => $user->citie?->name ?? '',
+        'postcode' => $user->postcode?->name ?? '',
+    ]);
+}
 
     /** Detach + delete an additional guardian belonging to this parent's children. */
     public function destroyGuardian(Request $request, $guardian)
-    {
-        $parent = $request->user();
-        $model = User::find($guardian);
+{
+    $parent = $request->user();
 
-        if (! $model || $model->id === $parent->id) {
-            return response()->json(['message' => 'Guardian not found.'], 404);
-        }
+    // $guardian = guardians.id
+    $guardianRecord = DB::table('guardians')
+        ->where('id', $guardian)
+        ->first();
 
-        $model->students()->detach();
-        $model->delete();
-
-        return response()->json(['success' => true]);
+    if (! $guardianRecord) {
+        return response()->json([
+            'message' => 'Guardian not found.'
+        ], 404);
     }
+
+    // Find guardian account from users table using email
+    $user = User::where('email', $guardianRecord->email)->first();
+
+    if (! $user) {
+        return response()->json([
+            'message' => 'Guardian user account not found.'
+        ], 404);
+    }
+
+    // Prevent logged-in parent from deleting themselves
+    if ($user->id === $parent->id) {
+        return response()->json([
+            'message' => 'You cannot delete your own account.'
+        ], 422);
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $guardianEmail = $guardianRecord->email;
+
+        // 1. Delete guardian/student relationships
+        DB::table('guardians')
+            ->where('email', $guardianEmail)
+            ->delete();
+
+        // 2. Delete guardian account from users table
+        $user->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Guardian deleted successfully.'
+        ]);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        \Log::error('Guardian delete failed', [
+            'guardian_id' => $guardian,
+            'user_id'     => $user->id,
+            'error'       => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to delete guardian.',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
 
     /* ---------------------------------------------------------------- */
     /* school                                                            */

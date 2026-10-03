@@ -9,6 +9,7 @@ use App\Models\SchoolGrade;
 use App\Models\StudentRemark;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -74,25 +75,73 @@ class PortalFormsController extends Controller
     /* ----------------------------- guardians ---------------------------- */
 
     private function guardianRules(?int $ignoreId = null): array
-    {
-        return [
-            'name'         => ['required', 'string', 'max:255'],
-            'email'        => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($ignoreId)],
-            'username'     => ['nullable', 'string', 'max:255'],
-            'ic'           => ['nullable', 'string', 'max:255'],
-            'phone_num'    => ['nullable', 'string', 'max:255'],
-            'occupation'   => ['nullable', 'string', 'max:255'],
-            'relationship' => ['nullable', 'string', 'max:255'],
-            'address'      => ['nullable', 'string'],
-            'password'     => [$ignoreId ? 'nullable' : 'required', 'string', 'min:8'],
-        ];
-    }
+{
+    return [
+        'name' => [
+            'required',
+            'string',
+            'max:255'
+        ],
+
+        'email' => [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email')->ignore($ignoreId)
+        ],
+
+        'username' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'ic' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'phone_num' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'occupation' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'relationship' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'address' => [
+            'nullable',
+            'string'
+        ],
+
+        'password' => $ignoreId
+            ? ['nullable', 'string', 'min:8']
+            : ['required', 'string', 'min:8'],
+    ];
+}
 
     public function guardianStore(Request $request)
-    {
-        $parent = $request->user();
-        $data = $request->validate($this->guardianRules());
+{
+    $parent = $request->user();
 
+    $data = $request->validate($this->guardianRules());
+
+    DB::beginTransaction();
+
+    try {
+
+        // 1. Create guardian login account in users table
         $guardian = User::create([
             'name'         => $data['name'],
             'email'        => $data['email'],
@@ -107,35 +156,231 @@ class PortalFormsController extends Controller
 
         $guardian->syncRoles(['parent']);
 
-        // link the guardian to the same children as the signed-in parent
-        $studentIds = $parent->allStudents()->pluck('students.id')->toArray();
-        if ($studentIds) {
-            $guardian->extraStudents()->syncWithoutDetaching($studentIds);
+        /*
+         * 2. Find ONLY the children belonging to the
+         *    currently logged-in parent.
+         *
+         * We use the guardians table as the source of truth.
+         */
+        $studentIds = DB::table('guardians')
+            ->where('ic', $parent->ic)
+            ->pluck('student_id')
+            ->filter()
+            ->unique();
+
+        /*
+         * Fallback for existing parents that may not yet
+         * have a guardians-table record.
+         */
+        if ($studentIds->isEmpty()) {
+            $studentIds = $parent->students()
+                ->pluck('students.id')
+                ->filter()
+                ->unique();
         }
 
-        return response()->json(['guardian' => $this->serializeUser($guardian), 'success' => 'Guardian added.'], 201);
+        // 3. Link new user account to those students
+        if ($studentIds->isNotEmpty()) {
+            $guardian->extraStudents()
+                ->syncWithoutDetaching($studentIds->toArray());
+        }
+
+        // 4. Insert guardian into guardians table
+        foreach ($studentIds as $studentId) {
+
+            DB::table('guardians')->updateOrInsert(
+                [
+                    'student_id' => $studentId,
+                    'ic'         => $data['ic'] ?? null,
+                ],
+                [
+                    'type'  => $data['relationship'] ?? 'Guardian',
+                    'name'  => $data['name'],
+                    'phone' => $data['phone_num'] ?? null,
+                    'email' => $data['email'],
+                ]
+            );
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'guardian' => $this->serializeUser($guardian),
+            'success'  => 'Guardian added.',
+        ], 201);
+
+    } catch (\Throwable $e) {
+
+        DB::rollBack();
+
+        \Log::error('Unable to create guardian', [
+            'message' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'message' => 'Unable to add guardian.',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
+
+    public function guardianEdit(Request $request, $guardian)
+{
+    // $guardian = guardians.id
+    $guardianRecord = DB::table('guardians')
+        ->where('id', $guardian)
+        ->first();
+
+    if (! $guardianRecord) {
+        return response()->json([
+            'message' => 'Guardian not found.'
+        ], 404);
     }
 
-    public function guardianEdit(Request $request, User $guardian)
-    {
-        return response()->json(['guardian' => $this->serializeUser($guardian)]);
+    // Link guardians -> users through email
+    $user = User::where('email', $guardianRecord->email)->first();
+
+    if (! $user) {
+        return response()->json([
+            'message' => 'Guardian user account not found.'
+        ], 404);
     }
 
-    public function guardianUpdate(Request $request, User $guardian)
-    {
-        $data = $request->validate($this->guardianRules($guardian->id));
+    // DISPLAY DETAILS FROM USERS TABLE
+    return response()->json([
+        'guardian' => [
+            // Keep guardian table ID for navigation/update
+            'id'           => $guardianRecord->id,
 
-        $guardian->fill(collect($data)->except('password')->toArray());
+            // Details below come from users table
+            'name'         => $user->name,
+            'username'     => $user->username,
+            'ic'           => $user->ic,
+            'phone_num'    => $user->phone_num,
+            'email'        => $user->email,
+            'occupation'   => $user->occupation,
+            'relationship' => $user->relationship,
+            'address'      => $user->address,
+        ],
+
+        'state'    => $user->state?->name ?? '',
+        'city'     => $user->citie?->name ?? '',
+        'postcode' => $user->postcode?->name ?? '',
+    ]);
+}
+    public function guardianUpdate(Request $request, $guardian)
+{
+    // $guardian = guardians.id
+    $guardianRecord = DB::table('guardians')
+        ->where('id', $guardian)
+        ->first();
+
+    if (! $guardianRecord) {
+        return response()->json([
+            'message' => 'Guardian not found.'
+        ], 404);
+    }
+
+    // Find users account through guardians.email
+    $user = User::where('email', $guardianRecord->email)->first();
+
+    if (! $user) {
+        return response()->json([
+            'message' => 'Guardian user account not found.'
+        ], 404);
+    }
+
+    $data = $request->validate([
+        'name'         => ['required', 'string', 'max:255'],
+        'email'        => [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email')->ignore($user->id),
+        ],
+        'username'     => ['nullable', 'string', 'max:255'],
+        'ic'           => ['nullable', 'string', 'max:255'],
+        'phone_num'    => ['nullable', 'string', 'max:255'],
+        'occupation'   => ['nullable', 'string', 'max:255'],
+        'relationship' => ['nullable', 'string', 'max:255'],
+        'address'      => ['nullable', 'string'],
+        'password'     => ['nullable', 'string', 'min:8'],
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+
+        // =====================================
+        // 1. UPDATE USERS TABLE
+        // =====================================
+
+        $user->name = $data['name'];
+        $user->username = $data['username'] ?? $user->username;
+        $user->ic = $data['ic'] ?? null;
+        $user->phone_num = $data['phone_num'] ?? null;
+        $user->email = $data['email'];
+        $user->occupation = $data['occupation'] ?? null;
+        $user->relationship = $data['relationship'] ?? null;
+        $user->address = $data['address'] ?? null;
 
         if (! empty($data['password'])) {
-            $guardian->password = Hash::make($data['password']);
+            $user->password = Hash::make($data['password']);
         }
 
-        $guardian->save();
+        $user->save();
 
-        return response()->json(['guardian' => $this->serializeUser($guardian), 'success' => 'Guardian updated.']);
+
+        // =====================================
+        // 2. UPDATE GUARDIANS TABLE
+        // =====================================
+
+        DB::table('guardians')
+            ->where('id', $guardianRecord->id)
+            ->update([
+                'name'  => $data['name'],
+                'ic'    => $data['ic'] ?? null,
+                'phone' => $data['phone_num'] ?? null,
+                'email' => $data['email'],
+                'type'  => $data['relationship'] ?? 'Guardian',
+            ]);
+
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Guardian updated successfully.',
+            'guardian' => [
+                'id'           => $guardianRecord->id,
+                'name'         => $user->name,
+                'username'     => $user->username,
+                'ic'           => $user->ic,
+                'phone_num'    => $user->phone_num,
+                'email'        => $user->email,
+                'occupation'   => $user->occupation,
+                'relationship' => $user->relationship,
+                'address'      => $user->address,
+            ],
+        ]);
+
+    } catch (\Throwable $e) {
+
+        DB::rollBack();
+
+        \Log::error('Guardian update failed', [
+            'guardian_id' => $guardianRecord->id,
+            'user_id'     => $user->id,
+            'error'       => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to update guardian.',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
-
+}
     /* ------------------------------ remarks ----------------------------- */
 
     public function showRemarks(Request $request, $student)

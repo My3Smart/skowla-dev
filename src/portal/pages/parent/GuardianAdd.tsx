@@ -16,7 +16,7 @@ export default function GuardianAdd() {
     const body = Object.fromEntries(form.entries());
     try {
       await api("/api/portal/profile/guardian", { method: "POST", body });
-      navigate("/profile");
+      navigate(-1);
     } catch {
       setError("Unable to add guardian. Please check the form.");
     } finally {
@@ -40,7 +40,7 @@ export default function GuardianAdd() {
                 <h3 className="fw-bold m-0">Add guardian profile details</h3>
               </div>
             </div>
-            <div className="collapse show">
+            <div>
               <form className="form" onSubmit={handleSubmit}>
                 <div className="card-body border-top p-9">
                   {error && <div className="alert alert-danger">{error}</div>}
@@ -123,7 +123,13 @@ export default function GuardianAdd() {
                 </div>
 
                 <div className="card-footer d-flex justify-content-end py-6 px-9">
-                  <Link to="/profile" className="btn btn-light btn-active-light-primary me-2">Cancel</Link>
+                  <button
+                    type="button"
+                    className="btn btn-light btn-active-light-primary me-2"
+                    onClick={() => navigate(-1)}
+                  >
+                    Cancel
+                  </button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
                     {submitting ? "Saving…" : "Save"}
                   </button>

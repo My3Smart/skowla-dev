@@ -11,6 +11,7 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Zoha\Metable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -86,14 +87,21 @@ public function allStudents()
 // Get additional guardians (other parents linked to the same students)
 public function additionalGuardians()
 {
-    $studentIds = $this->students()->pluck('students.id');
+    // Find ONLY the student IDs belonging to this logged-in parent
+    $studentIds = DB::table('guardians')
+        ->where('ic', $this->ic)
+        ->pluck('student_id')
+        ->unique();
 
-    return User::whereHas('students', function($q) use ($studentIds) {
-        $q->whereIn('student_id', $studentIds);
-    })
-    ->where('id', '!=', $this->id) // exclude this parent
-    ->distinct()
-    ->get();
+    if ($studentIds->isEmpty()) {
+        return collect();
+    }
+
+    // Find the OTHER guardians for ONLY those students
+    return DB::table('guardians')
+        ->whereIn('student_id', $studentIds)
+        ->where('ic', '!=', $this->ic)
+        ->get();
 }
 
 public function classes()

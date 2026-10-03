@@ -105,7 +105,10 @@ export default function GuardianShow() {
                     <button type="button" className="btn btn-danger align-self-center me-2" onClick={handleDelete}>
                       Delete Profile
                     </button>
-                    <Link to={`/profile/guardian/${guardian.id}/edit`} className="btn btn-primary">
+                    <Link
+                      to={`/parent/guardian/${guardian.id}/edit`}
+                      className="btn btn-primary"
+                    >
                       Edit profile
                     </Link>
                   </div>

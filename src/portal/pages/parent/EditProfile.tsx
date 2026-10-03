@@ -37,7 +37,7 @@ export default function EditProfile() {
     const body = Object.fromEntries(form.entries());
     try {
       await api("/api/portal/profile/update", { method: "POST", body });
-      navigate("/profile");
+      navigate(-1);
     } catch {
       setError("Unable to update profile.");
     } finally {
@@ -63,7 +63,7 @@ export default function EditProfile() {
                 <h3 className="fw-bold m-0">Edit profile</h3>
               </div>
             </div>
-            <div className="collapse show">
+            <div>
               {loading ? (
                 <div className="text-center text-muted py-10">Loading…</div>
               ) : !user ? (

@@ -206,7 +206,7 @@ export function AppLayout({
                     {effectiveRole === "parent" && (
                       <>
                         <div className="menu-item px-5">
-                          <Link to="/profile" className="menu-link px-5">
+                          <Link to="/parent/profile" className="menu-link px-5">
                             Profile
                           </Link>
                         </div>

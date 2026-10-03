@@ -39,7 +39,7 @@ export default function GuardianEdit() {
     const body = Object.fromEntries(form.entries());
     try {
       await api(`/api/portal/profile/guardian/${id}`, { method: "PUT", body });
-      navigate(`/profile/guardian/${id}`);
+      navigate(-1);
     } catch {
       setError("Unable to update guardian.");
     } finally {
@@ -63,7 +63,7 @@ export default function GuardianEdit() {
                 <h3 className="fw-bold m-0">Edit profile</h3>
               </div>
             </div>
-            <div className="collapse show">
+            <div>
               {loading ? (
                 <div className="text-center text-muted py-10">Loading…</div>
               ) : !guardian ? (
@@ -136,7 +136,13 @@ export default function GuardianEdit() {
                   </div>
 
                   <div className="card-footer d-flex justify-content-end py-6 px-9">
-                    <Link to="/profile" className="btn btn-light btn-active-light-primary me-2">Cancel</Link>
+                    <button
+                      type="button"
+                      className="btn btn-light btn-active-light-primary me-2"
+                      onClick={() => navigate(-1)}
+                    >
+                      Cancel
+                    </button>
                     <button type="submit" className="btn btn-primary" disabled={submitting}>
                       {submitting ? "Saving…" : "Save"}
                     </button>
