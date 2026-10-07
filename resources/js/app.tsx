@@ -5,7 +5,7 @@ import App from './App';
 function App() {
     return (
         <div>
-            <h1>Skoola</h1>
+            <h1>skowla</h1>
             <p>React frontend is running.</p>
         </div>
     );

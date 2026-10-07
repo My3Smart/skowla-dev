@@ -97,12 +97,12 @@ export default function Welcome() {
   const ready = useMetronic();
 
   useEffect(() => {
-    document.title = "Skoola — Sistem Kehadiran & Pengurusan Sekolah Pintar";
+    document.title = "Skowla — Sistem Kehadiran & Pengurusan Sekolah Pintar";
     const desc = document.querySelector('meta[name="description"]');
     if (desc) {
       desc.setAttribute(
         "content",
-        "Skoola menggunakan kad RFID untuk merekod kehadiran pelajar secara automatik, memaklumkan ibu bapa serta-merta dan mengurangkan kerja pentadbiran guru.",
+        "Skowla menggunakan kad RFID untuk merekod kehadiran pelajar secara automatik, memaklumkan ibu bapa serta-merta dan mengurangkan kerja pentadbiran guru.",
       );
     }
   }, []);
@@ -308,7 +308,7 @@ export default function Welcome() {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-9">
-              <h2 className="fs-2hx fw-bolder mb-6 text-center">Kenapa kami bina Skoola</h2>
+              <h2 className="fs-2hx fw-bolder mb-6 text-center">Kenapa kami bina Skowla</h2>
               <p className="fs-4 text-gray-800 lh-lg">
                 Setiap pagi, ribuan ibu bapa menghantar anak ke sekolah tanpa kepastian: adakah anak
                 sampai dengan selamat, dan ke mana perginya wang saku hari itu?
@@ -367,7 +367,7 @@ export default function Welcome() {
       <section className="py-16">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="fs-2hx fw-bolder mb-3">Pasukan di sebalik Skoola</h2>
+            <h2 className="fs-2hx fw-bolder mb-3">Pasukan di sebalik Skowla</h2>
             <p className="fs-5 text-gray-600 mb-0">My3Smart Digital Sdn Bhd</p>
           </div>
           <div className="row g-6 justify-content-center">

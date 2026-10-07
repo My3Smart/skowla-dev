@@ -64,10 +64,10 @@ export default function Login() {
         <div className="d-flex flex-lg-row-fluid">
           <div className="d-flex flex-column flex-center pb-0 pb-lg-10 p-10 w-100">
             <img
-  className="theme-light-show mx-auto mw-100 w-400px w-lg-500px mb-0"
-  src="/assets/media/auth/skoola-new.jpeg"
-  alt="Skoola Logo"
-/>
+              className="theme-light-show mx-auto mw-100 w-400px w-lg-500px mb-0"
+              src="/assets/media/auth/skoola-new.jpeg"
+              alt="Skoola Logo"
+            />
             <img
               className="theme-dark-show mx-auto mw-100 w-150px w-lg-300px mb-10 mb-lg-20"
               src="/assets/media/auth/agency-dark.png"
