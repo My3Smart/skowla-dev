@@ -76,7 +76,7 @@ const LoginRedirect = () => {
     return null;
   }
 
-  return <Navigate to="/login" replace />;
+  return <Login />;
 };
 
 const SchoolLoginRedirect = () => {
@@ -98,7 +98,7 @@ const SchoolLoginRedirect = () => {
     return null;
   }
 
-  return <Navigate to="/school-login" replace />;
+  return <SchoolLogin />;
 };
 
 const App = () => {
