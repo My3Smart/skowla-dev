@@ -1,3 +1,4 @@
+
 <?php
 
 return [
@@ -17,6 +18,10 @@ return [
 
     'allowed_origins' => [
         'http://localhost:5173',
+        'http://localhost:4200',
+        'http://127.0.0.1:4200',
+        'https://skowla.com',
+        'https://login.skowla.com',
     ],
 
     'allowed_origins_patterns' => [],
