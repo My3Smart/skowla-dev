@@ -5,6 +5,15 @@ import { api, ApiError } from "../../api";
 import GuardianForm, { GuardianFormValue } from "./GuardianForm";
 import "../../portal.css";
 
+const RELATIONSHIPS = [
+  "Father",
+  "Mother",
+  "Guardian 1",
+  "Guardian 2",
+] as const;
+
+const MAX_GUARDIANS = 4;
+
 const emptyGuardian = (): GuardianFormValue => ({
   name: "",
   username: "",
@@ -79,11 +88,62 @@ export default function Register() {
     return () => window.clearTimeout(t);
   }, [ic]);
 
-  const addGuardian = () => setGuardians((g) => [...g, emptyGuardian()]);
+  const addGuardian = () => {
+  setGuardians((current) => {
+    if (current.length + 1 >= MAX_GUARDIANS) {
+      return current;
+    }
+
+    const usedRelationships = [
+      relationship,
+      ...current.map((g) => g.relationship),
+    ];
+
+    const nextRelationship = RELATIONSHIPS.find(
+      (r) => !usedRelationships.includes(r)
+    );
+
+    if (!nextRelationship) {
+      return current;
+    }
+
+    return [
+      ...current,
+      {
+        ...emptyGuardian(),
+        relationship: nextRelationship,
+      },
+    ];
+  });
+};
   const removeGuardian = (index: number) =>
     setGuardians((g) => g.filter((_, i) => i !== index));
-  const updateGuardian = (index: number, field: keyof GuardianFormValue, value: string) =>
-    setGuardians((g) => g.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  const updateGuardian = (
+  index: number,
+  field: keyof GuardianFormValue,
+  value: string
+) => {
+  setGuardians((current) => {
+    if (field === "relationship") {
+      const used = [
+        relationship,
+        ...current
+          .filter((_, i) => i !== index)
+          .map((g) => g.relationship),
+      ];
+
+      if (used.includes(value)) {
+        return current;
+      }
+    }
+
+    return current.map((row, i) =>
+      i === index
+        ? { ...row, [field]: value }
+        : row
+    );
+  });
+};
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -304,9 +364,17 @@ export default function Register() {
                             onChange={(e) => setRelationship(e.target.value)}
                           >
                             <option value="">Select Relationship</option>
-                            <option value="Father">Father</option>
-                            <option value="Mother">Mother</option>
-                            <option value="Guardian">Guardian</option>
+                            {RELATIONSHIPS.map((r) => (
+  <option
+    key={r}
+    value={r}
+    disabled={guardians.some(
+      (g) => g.relationship === r
+    )}
+  >
+    {r}
+  </option>
+))}
                           </select>
                         </div>
                       </div>
@@ -355,23 +423,32 @@ export default function Register() {
 
                       <div id="additional-guardians-container">
                         {guardians.map((guardian, index) => (
-                          <GuardianForm
-                            key={index}
-                            index={index}
-                            value={guardian}
-                            onChange={updateGuardian}
-                            onRemove={removeGuardian}
-                          />
-                        ))}
+  <GuardianForm
+    key={index}
+    index={index}
+    value={guardian}
+    onChange={updateGuardian}
+    onRemove={removeGuardian}
+    usedRelationships={[
+      relationship,
+      ...guardians
+        .filter((_, i) => i !== index)
+        .map((g) => g.relationship),
+    ]}
+  />
+))}
                       </div>
                       <button
-                        type="button"
-                        className="btn btn-secondary w-100 mb-4"
-                        id="add-guardian-btn"
-                        onClick={addGuardian}
-                      >
-                        Add Guardian
-                      </button>
+  type="button"
+  className="btn btn-secondary w-100 mb-4"
+  id="add-guardian-btn"
+  onClick={addGuardian}
+  disabled={guardians.length + 1 >= MAX_GUARDIANS}
+>
+  {guardians.length + 1 >= MAX_GUARDIANS
+    ? "Maximum 4 Guardians Reached"
+    : `Add Guardian (${guardians.length + 1}/4)`}
+</button>
 
                       <div id="student-forms-container">
                         {students === null ? null : students.length === 0 ? (

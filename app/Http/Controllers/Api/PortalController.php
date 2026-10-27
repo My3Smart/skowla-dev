@@ -12,6 +12,7 @@ use App\Models\Guardian;
 use App\Actions\Fortify\CreateNewUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Services\CbsService;
 
 /**
  * Read-only JSON endpoints used by the React portal.
@@ -97,7 +98,47 @@ class PortalController extends Controller
             $guardianUsers[] = $guardian;
         }
 
-        
+        // Synchronize users with CBS only after
+        // the SKOOLA database transaction commits.
+        DB::afterCommit(function () use ($user, $guardianUsers) {
+
+    $cbs = app(CbsService::class);
+
+    $accounts = array_merge([$user], $guardianUsers);
+
+    foreach ($accounts as $account) {
+
+        try {
+            // Synchronize parent or guardian to CBS.
+            $cbs->syncUser($account);
+
+            // Find children already linked through SKOOLA guardians.
+            $studentIds = DB::table('guardians')
+                ->where('ic', $account->ic)
+                ->pluck('student_id')
+                ->unique();
+
+            $students = Student::whereIn('id', $studentIds)->get();
+
+            foreach ($students as $student) {
+                // Synchronize child and guardian-child relationship.
+                $cbs->syncDependent($account, $student);
+            }
+
+            \Log::info('CBS registration synchronization completed', [
+                'skoola_user_id' => $account->id,
+                'student_count' => $students->count(),
+            ]);
+
+        } catch (\Throwable $e) {
+
+            \Log::error('CBS registration synchronization failed', [
+                'skoola_user_id' => $account->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+});
 
         return response()->json([
             'message' => 'Registration successful.',

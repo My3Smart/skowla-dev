@@ -123,7 +123,12 @@ class PortalParentController extends Controller
 {
     $parent = $request->user();
 
-    $guardians = $parent->additionalGuardians();
+    $guardians = collect($parent->additionalGuardians());
+
+    $maxAdditionalGuardians = 3;
+    $guardianCount = $guardians->count();
+
+    $canAddGuardian = $guardianCount < $maxAdditionalGuardians;
 
     return response()->json([
         'parent' => [
@@ -136,6 +141,9 @@ class PortalParentController extends Controller
             'relationship' => $parent->relationship,
             'username'     => $parent->username,
             'address'      => $parent->address,
+            'guardian_limit' => $maxAdditionalGuardians,
+            'guardian_count' => $guardianCount,
+            'can_add_guardian' => $canAddGuardian,
         ],
 
         'state' => $parent->state

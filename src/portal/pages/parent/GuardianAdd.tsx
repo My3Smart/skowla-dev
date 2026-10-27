@@ -17,11 +17,26 @@ export default function GuardianAdd() {
     try {
       await api("/api/portal/profile/guardian", { method: "POST", body });
       navigate(-1);
-    } catch {
-      setError("Unable to add guardian. Please check the form.");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (error: any) {
+  console.error("GUARDIAN SAVE ERROR:", error);
+
+  const response = error?.response?.data ?? error?.data;
+
+  const validationErrors = response?.errors;
+
+  let message =
+    response?.message ||
+    error?.message ||
+    "Unable to add guardian. Please check the form.";
+
+  if (validationErrors) {
+    message = Object.values(validationErrors)
+      .flat()
+      .join("\n");
+  }
+
+  alert(message);
+}
   };
 
   return (
@@ -94,7 +109,8 @@ export default function GuardianAdd() {
                         <option value="">Select relationship</option>
                         <option value="Father">Father</option>
                         <option value="Mother">Mother</option>
-                        <option value="Guardian">Guardian</option>
+                        <option value="Guardian">Guardian 1</option>
+                        <option value="Guardian">Guardian 2</option>
                       </select>
                     </div>
                   </div>

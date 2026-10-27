@@ -123,6 +123,7 @@ export default function GuardianEdit() {
                           <option value="Father">Father</option>
                           <option value="Mother">Mother</option>
                           <option value="Guardian">Guardian</option>
+                          <option value="Guardian">Guardian 2</option>
                         </select>
                       </div>
                     </div>

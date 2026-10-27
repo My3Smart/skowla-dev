@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/portal/layouts/AppLayout";
 import { api } from "@/portal/api";
 
@@ -15,40 +15,75 @@ interface AttendanceDetail {
 }
 
 export default function EditRemarks() {
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
   const navigate = useNavigate();
   const [data, setData] = useState<AttendanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [remarks, setRemarks] = useState("all");
+  const [remarks, setRemarks] = useState("");
   const [remarksInput, setRemarksInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    api<AttendanceDetail>(`/api/portal/remarks/${id}`)
-      .then((res) => {
-        setData(res);
-        setRemarks(res.remarks ?? "all");
-        setRemarksInput(res.remarksInput ?? "");
-      })
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
-  }, [id]);
+  if (!id) {
+    console.error("Attendance ID is missing");
+    setData(null);
+    setLoading(false);
+    return;
+  }
+
+  setLoading(true);
+
+  api<AttendanceDetail | { data: AttendanceDetail }>(
+    `/api/portal/remarks/${id}`
+  )
+    .then((res) => {
+      console.log("FULL API RESPONSE:", JSON.stringify(res, null, 2));
+
+      const attendance =
+        res && "data" in res ? res.data : res;
+
+      console.log("ATTENDANCE DETAILS:", JSON.stringify(attendance, null, 2));
+
+      setData(attendance);
+      setRemarks(attendance.remarks?.toLowerCase() ?? "");
+      setRemarksInput(attendance.remarksInput ?? "");
+    })
+    .catch((error) => {
+      console.error("FAILED TO LOAD ATTENDANCE:", error);
+      setData(null);
+    })
+    .finally(() => setLoading(false));
+}, [id]);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await api(`/api/portal/remarks/${id}`, {
-        method: "POST",
-        body: { remarks, remarksInput },
-      });
-      navigate("/attendance");
-    } catch {
-      /* ignore */
-    } finally {
-      setSaving(false);
-    }
-  };
+  e.preventDefault();
+
+  setSaving(true);
+  setSuccessMessage("");
+  setErrorMessage("");
+
+  try {
+    await api(`/api/portal/remarks/${id}`, {
+      method: "POST",
+      body: { remarks, remarksInput },
+    });
+
+    setSuccessMessage("Remarks saved successfully!");
+
+    setTimeout(() => {
+      navigate(-1);
+    }, 1500);
+
+  } catch (error) {
+    console.error("Failed to save remarks:", error);
+    setErrorMessage("Failed to save remarks. Please try again.");
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
@@ -66,10 +101,10 @@ export default function EditRemarks() {
         <div className="card-header border-0">
           <div className="card-title m-0">
             <h3 className="fw-bold m-0">Edit Remarks</h3>
-          </div>
+          </div>  
         </div>
 
-        <div id="kt_account_settings_profile_details" className="collapse show">
+        <div id="kt_account_settings_profile_details">
           <form id="kt_account_profile_details_form" className="form" onSubmit={handleSubmit}>
             <div className="card-body border-top p-9">
               <div className="row mb-6">
@@ -153,83 +188,77 @@ export default function EditRemarks() {
               </div>
 
               <div className="row mb-6">
-                <label className="col-lg-4 col-form-label fw-semibold fs-6">Remarks</label>
-                <div className="col-lg-8 fv-row">
-                  <label className="form-check form-check-sm form-check-custom form-check-solid mb-3 me-5">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="remarks"
-                      value="all"
-                      checked={remarks === "all" && remarksInput === ""}
-                      onChange={() => {
-                        setRemarks("all");
-                      }}
-                    />
-                    <span className="form-check-label text-gray-600">Sick</span>
-                  </label>
-                  <label className="form-check form-check-sm form-check-custom form-check-solid mb-3 me-5">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="remarks"
-                      value="all"
-                      checked={false}
-                      onChange={() => setRemarks("all")}
-                    />
-                    <span className="form-check-label text-gray-600">Family Matters</span>
-                  </label>
-                  <label className="form-check form-check-sm form-check-custom form-check-solid mb-3 me-5">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="remarks"
-                      value="all"
-                      checked={false}
-                      onChange={() => setRemarks("all")}
-                    />
-                    <span className="form-check-label text-gray-600">Late</span>
-                  </label>
-                  <label className="form-check form-check-sm form-check-custom form-check-solid mb-3 me-5">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="remarks"
-                      value="others"
-                      checked={remarks === "others"}
-                      onChange={() => setRemarks("others")}
-                    />
-                    <span className="form-check-label text-gray-600">Others</span>
-                  </label>
-                  <div className="col-lg-8 fv-row">
-                    {remarks === "others" && (
-                      <div id="remarksField">
-                        <label htmlFor="remarksInput"></label>
-                        <textarea
-                          className="form-control form-control-lg form-control-solid"
-                          id="remarksInput"
-                          value={remarksInput}
-                          onChange={(e) => setRemarksInput(e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+  <label className="col-lg-4 col-form-label fw-semibold fs-6">
+    Remarks
+  </label>
+
+  <div className="col-lg-8 fv-row">
+    {["Sick", "Family Matters", "Late", "Others"].map((option) => (
+      <label
+        key={option}
+        className="form-check form-check-sm form-check-custom form-check-solid mb-3 me-5"
+      >
+        <input
+          className="form-check-input"
+          type="radio"
+          name="remarks"
+          value={option.toLowerCase()}
+          checked={remarks === option.toLowerCase()}
+          onChange={() => {
+            setRemarks(option.toLowerCase());
+
+            if (option !== "Others") {
+              setRemarksInput("");
+            }
+          }}
+        />
+
+        <span className="form-check-label text-gray-600">
+          {option}
+        </span>
+      </label>
+    ))}
+
+    {remarks === "others" && (
+      <textarea
+        className="form-control form-control-lg form-control-solid mt-3"
+        placeholder="Please specify your remarks"
+        value={remarksInput}
+        onChange={(e) => setRemarksInput(e.target.value)}
+      />
+    )}
+  </div>
+</div>
             </div>
 
+            {successMessage && (
+  <div className="alert alert-success mx-9 mt-4">
+    <i className="ki-duotone ki-check-circle fs-2 text-success me-2"></i>
+    {successMessage}
+  </div>
+)}
+
+{errorMessage && (
+  <div className="alert alert-danger mx-9 mt-4">
+    {errorMessage}
+  </div>
+)}
+
             <div className="card-footer d-flex justify-content-end py-6 px-9">
-              <button type="reset" className="btn btn-light btn-active-light-primary me-2">
-                Discard
-              </button>
               <button
-                type="submit"
-                className="btn btn-primary"
-                id="kt_account_profile_details_submit"
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
+  type="button"
+  className="btn btn-light btn-active-light-primary me-2"
+  onClick={() => navigate(-1)}
+>
+  Discard
+</button>
+              <button
+  type="submit"
+  className="btn btn-primary"
+  disabled={saving || !!successMessage}
+>
+  {saving ? "Saving..." : "Save Changes"}
+</button>
             </div>
           </form>
         </div>

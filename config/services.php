@@ -45,4 +45,10 @@ return [
         'redirect'      => env('FACEBOOK_REDIRECT'),
     ],
 
+    'cbs' => [
+        'url' => env('CBS_API_URL'),
+        'api_key' => env('CBS_API_KEY'),
+        'organization_id' => env('CBS_ORGANIZATION_ID'),
+    ],
+
 ];

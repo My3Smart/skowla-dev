@@ -65,8 +65,8 @@ Route::middleware(['auth:sanctum'])->prefix('portal')->group(function () {
     Route::get('/profile/guardian/{guardian}/edit', [\App\Http\Controllers\Api\PortalFormsController::class, 'guardianEdit']);
     Route::put('/profile/guardian/{guardian}', [\App\Http\Controllers\Api\PortalFormsController::class, 'guardianUpdate']);
 
-    Route::get('/remarks/{student}', [\App\Http\Controllers\Api\PortalFormsController::class, 'showRemarks']);
-    Route::post('/remarks/{student}', [\App\Http\Controllers\Api\PortalFormsController::class, 'saveRemarks']);
+    Route::get('/remarks/{attendance}', [\App\Http\Controllers\Api\PortalFormsController::class, 'showRemarks']);
+    Route::post('/remarks/{attendance}', [\App\Http\Controllers\Api\PortalFormsController::class, 'saveRemarks']);
 
     Route::get('/class-names', [\App\Http\Controllers\Api\PortalFormsController::class, 'classNames']);
     Route::post('/class-names', [\App\Http\Controllers\Api\PortalFormsController::class, 'updateClassNames']);

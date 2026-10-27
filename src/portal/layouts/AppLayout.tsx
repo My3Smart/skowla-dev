@@ -210,11 +210,11 @@ export function AppLayout({
                             Profile
                           </Link>
                         </div>
-                        <div className="menu-item px-5">
+                        {/* <div className="menu-item px-5">
                           <Link to="/student" className="menu-link px-5">
                             Children
                           </Link>
-                        </div>
+                        </div> */}
                       </>
                     )}
                     <div className="menu-item px-5">

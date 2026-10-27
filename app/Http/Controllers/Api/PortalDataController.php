@@ -314,19 +314,34 @@ class PortalDataController extends Controller
         'oku'           => ['nullable', 'string', 'max:20'],
 
         // Father
-        'father_name'   => ['nullable', 'string', 'max:255'],
+        'father_name' => [
+            'nullable',
+            'required_without_all:mother_name,guardian_name',
+            'string',
+            'max:255',
+        ],
         'father_ic'     => ['nullable', 'string', 'max:255'],
         'father_phone'  => ['nullable', 'string', 'max:50'],
         'father_email'  => ['nullable', 'email', 'max:255'],
 
         // Mother
-        'mother_name'   => ['nullable', 'string', 'max:255'],
+        'mother_name' => [
+            'nullable',
+            'required_without_all:father_name,guardian_name',
+            'string',
+            'max:255',
+        ],
         'mother_ic'     => ['nullable', 'string', 'max:255'],
         'mother_phone'  => ['nullable', 'string', 'max:50'],
         'mother_email'  => ['nullable', 'email', 'max:255'],
 
         // Guardian
-        'guardian_name'  => ['nullable', 'string', 'max:255'],
+        'guardian_name' => [
+            'nullable',
+            'required_without_all:father_name,mother_name',
+            'string',
+            'max:255',
+        ],
         'guardian_ic'    => ['nullable', 'string', 'max:255'],
         'guardian_phone' => ['nullable', 'string', 'max:50'],
         'guardian_email' => ['nullable', 'email', 'max:255'],

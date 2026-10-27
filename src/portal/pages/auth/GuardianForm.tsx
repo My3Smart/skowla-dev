@@ -14,12 +14,23 @@ export interface GuardianFormValue {
 interface GuardianFormProps {
   index: number;
   value: GuardianFormValue;
-  onChange: (index: number, field: keyof GuardianFormValue, value: string) => void;
+  onChange: (
+    index: number,
+    field: keyof GuardianFormValue,
+    value: string
+  ) => void;
   onRemove: (index: number) => void;
+  usedRelationships: string[];
 }
 
 /** Mirrors auth/_guardian-form.blade.php */
-export default function GuardianForm({ index, value, onChange, onRemove }: GuardianFormProps) {
+export default function GuardianForm({
+  index,
+  value,
+  onChange,
+  onRemove,
+  usedRelationships,
+}: GuardianFormProps) {
   const field = (name: keyof GuardianFormValue) => `guardians[${index}][${name}]`;
 
   return (
@@ -96,21 +107,42 @@ export default function GuardianForm({ index, value, onChange, onRemove }: Guard
         </div>
 
         <div className="row mb-6">
-          <label className="col-lg-4 col-form-label">Relationship</label>
-          <div className="col-lg-8 fv-row">
-            <select
-              name={field("relationship")}
-              className="form-control"
-              value={value.relationship}
-              onChange={(e) => onChange(index, "relationship", e.target.value)}
-            >
-              <option value="">Select Relationship</option>
-              <option value="father">Father</option>
-              <option value="mother">Mother</option>
-              <option value="guardian">Guardian</option>
-            </select>
-          </div>
-        </div>
+  <label className="col-lg-4 col-form-label required">
+    Relationship
+  </label>
+
+  <div className="col-lg-8 fv-row">
+    <select
+      name={field("relationship")}
+      className="form-control"
+      value={value.relationship}
+      onChange={(e) =>
+        onChange(index, "relationship", e.target.value)
+      }
+      required
+    >
+      <option value="">Select Relationship</option>
+
+      {[
+        "Father",
+        "Mother",
+        "Guardian 1",
+        "Guardian 2",
+      ].map((relation) => (
+        <option
+          key={relation}
+          value={relation}
+          disabled={
+            usedRelationships.includes(relation) &&
+            value.relationship !== relation
+          }
+        >
+          {relation}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
 
         <div className="row mb-6">
           <label className="col-lg-4 col-form-label">Occupation</label>

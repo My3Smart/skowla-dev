@@ -80,7 +80,7 @@ export default function Attendance() {
                         <td>
                           {row.status?.toLowerCase() === "absent" && (
                             <Link
-                              to={`/attendance/edit-remarks/${row.id}`}
+                              to={`/parent/remarks/edit?id=${row.id}`}
                               className="btn btn-sm btn-primary"
                             >
                               Edit

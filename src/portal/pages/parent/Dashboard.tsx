@@ -51,61 +51,61 @@ export default function Dashboard() {
   const studentEntries = Object.entries(students);
 
   useEffect(() => {
-  if (!data || studentEntries.length === 0) {
-    return;
-  }
+    if (!data || studentEntries.length === 0) {
+      return;
+    }
 
-  const charts: ApexCharts[] = [];
+    const charts: ApexCharts[] = [];
 
-  studentEntries.forEach(([studentId, studentName]) => {
-    const element = document.querySelector(`#pie_chart_${studentId}`);
+    studentEntries.forEach(([studentId, studentName]) => {
+      const element = document.querySelector(`#pie_chart_${studentId}`);
 
-    if (!element) return;
+      if (!element) return;
 
-    const [presentCount, absentCount] =
-      attendanceData[studentId] ?? [0, 0];
+      const [presentCount, absentCount] =
+        attendanceData[studentId] ?? [0, 0];
 
-    console.log("YEARLY CHART:", {
-      studentId,
-      studentName,
-      presentCount,
-      absentCount,
+      console.log("YEARLY CHART:", {
+        studentId,
+        studentName,
+        presentCount,
+        absentCount,
+      });
+
+      const chart = new ApexCharts(element, {
+        chart: {
+          type: "pie",
+          width: 280,
+          height: 280,
+        },
+
+        series: [presentCount, absentCount],
+
+        labels: ["Present", "Absent"],
+
+        colors: ["#50cd89", "#f1416c"],
+
+        legend: {
+          show: false,
+        },
+
+        dataLabels: {
+          enabled: true,
+        },
+
+        noData: {
+          text: "No attendance data",
+        },
+      });
+
+      chart.render();
+      charts.push(chart);
     });
 
-    const chart = new ApexCharts(element, {
-      chart: {
-        type: "pie",
-        width: 280,
-        height: 280,
-      },
-
-      series: [presentCount, absentCount],
-
-      labels: ["Present", "Absent"],
-
-      colors: ["#50cd89", "#f1416c"],
-
-      legend: {
-        show: false,
-      },
-
-      dataLabels: {
-        enabled: true,
-      },
-
-      noData: {
-        text: "No attendance data",
-      },
-    });
-
-    chart.render();
-    charts.push(chart);
-  });
-
-  return () => {
-    charts.forEach((chart) => chart.destroy());
-  };
-}, [data]);
+    return () => {
+      charts.forEach((chart) => chart.destroy());
+    };
+  }, [data]);
 
   return (
     <AppLayout title="Dashboard" role="parent">
@@ -257,7 +257,7 @@ export default function Dashboard() {
                                     <div className="d-flex flex-column">
                                       <span>{attendance.remarks ?? "-"}</span>
                                       <Link
-                                        to={`/attendance/edit-remarks/${attendance.id}`}
+                                        to={`/parent/remarks/edit?id=${attendance.id}`}
                                         className="text-primary fw-semibold mt-1"
                                         style={{ fontSize: "12px" }}
                                       >
