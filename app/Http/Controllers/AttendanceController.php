@@ -15,8 +15,11 @@ class AttendanceController extends Controller
         return view('attendance.view');
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new AttendancesExport, 'student_attendance.xlsx');
+        return Excel::download(
+            new AttendancesExport($request->user()->id),
+            'student_attendance.xlsx'
+        );
     }
 }

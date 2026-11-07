@@ -114,18 +114,15 @@ export function AppLayout({
 
             {/*begin::Logo*/}
             <div className="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-15">
-              <Link to="/dashboard" className="d-lg-none">
+              <Link to="/dashboard" className="d-flex align-items-center">
                 <img
-                  alt="Logo"
-                  src="/assets/media/logos/default-small.svg"
-                  className="h-30px"
-                />
-              </Link>
-              <Link to="/dashboard" className="d-none d-lg-flex">
-                <img
-                  alt="Logo"
-                  src="/assets/media/logos/default-dark.svg"
-                  className="h-30px"
+                  alt="Skoola Logo"
+                  src="/assets/media/auth/skowla-owl-logo.png"
+                  style={{
+                    height: "45px",
+                    width: "auto",
+                    objectFit: "contain",
+                  }}
                 />
               </Link>
             </div>
@@ -146,9 +143,6 @@ export function AppLayout({
                 data-kt-drawer-width="250px"
                 data-kt-drawer-direction="end"
                 data-kt-drawer-toggle="#kt_app_header_menu_toggle"
-                data-kt-swapper="true"
-                data-kt-swapper-mode="{default: 'append', lg: 'prepend'}"
-                data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}"
               >
                 <div
                   className="menu menu-rounded menu-column menu-lg-row my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0"

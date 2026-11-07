@@ -3,33 +3,39 @@
 namespace App\Exports;
 
 use App\Models\Attendance;
-use App\Models\Student;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class AttendancesExport implements FromCollection,WithHeadings
+class AttendancesExport implements FromCollection, WithHeadings
 {
-    /**
-    * @return \Illuminate\Support\Collection
-    */
+    protected int $parentId;
+
+    public function __construct(int $parentId)
+    {
+        $this->parentId = $parentId;
+    }
+
     public function collection()
     {
-        $parent_id = Auth::id();
-
-        // Get all student IDs linked to this parent
-        $studentIds = \DB::table('parent_student')
-            ->where('parent_id', $parent_id)
+        // Find children linked to this parent through guardians
+        $studentIds = DB::table('guardians')
+            ->whereIn('ic', function ($query) {
+                $query->select('ic')
+                    ->from('users')
+                    ->where('id', $this->parentId);
+            })
             ->pluck('student_id');
 
-        // Get attendances for those students
-        $attendances = Attendance::whereIn('student_id', $studentIds)->get();
+        // Retrieve only the parent's children's attendance
+        $attendances = Attendance::with('student')
+            ->whereIn('student_id', $studentIds)
+            ->orderBy('date', 'desc')
+            ->get();
 
-        // Map data for Excel
-        $data = $attendances->map(function ($attendance) {
-            $student = Student::find($attendance->student_id);
+        return $attendances->map(function ($attendance) {
             return [
-                $student ? $student->name : 'N/A',
+                $attendance->student?->name ?? 'N/A',
                 $attendance->check_in,
                 $attendance->check_out,
                 $attendance->date,
@@ -40,24 +46,20 @@ class AttendancesExport implements FromCollection,WithHeadings
                 $attendance->updated_at,
             ];
         });
-
-    return $data;
-}
-
+    }
 
     public function headings(): array
-{
-    return [
-        __('messages.studentname'),
-        __('messages.checkin'),
-        __('messages.checkout'),
-        __('messages.date'),
-        __('messages.status'),
-        __('messages.remarks'),
-        __('messages.remarks_desc'),
-        __('messages.created_at'),
-        __('messages.updated_at'),
-    ];
-}
-
+    {
+        return [
+            'Student Name',
+            'Check In',
+            'Check Out',
+            'Date',
+            'Status',
+            'Remarks',
+            'Remarks Description',
+            'Created At',
+            'Updated At',
+        ];
+    }
 }

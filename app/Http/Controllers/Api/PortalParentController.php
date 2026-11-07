@@ -376,4 +376,12 @@ class PortalParentController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function exportAttendance(Request $request)
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\AttendancesExport($request->user()->id),
+            'student_attendance.xlsx'
+        );
+    }
 }

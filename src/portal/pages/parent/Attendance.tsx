@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/portal/layouts/AppLayout";
-import { api } from "@/portal/api";
+import { api, API_BASE, getToken } from "@/portal/api";
 
 interface AttendanceRow {
   id: number;
@@ -16,6 +16,7 @@ interface AttendanceRow {
 export default function Attendance() {
   const [attendances, setAttendances] = useState<AttendanceRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     api<{ attendances?: AttendanceRow[] }>("/api/portal/parent/attendance")
@@ -23,6 +24,69 @@ export default function Attendance() {
       .catch(() => setAttendances([]))
       .finally(() => setLoading(false));
   }, []);
+
+  
+const handleExport = async () => {
+  if (exporting) return;
+
+  setExporting(true);
+
+  try {
+    const token = getToken();
+
+    const response = await fetch(
+      "/api/portal/parent/attendance/export",
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Export failed:", response.status, errorText);
+      throw new Error(`Export failed: ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+
+    if (
+      !contentType.includes("spreadsheetml") &&
+      !contentType.includes("application/octet-stream")
+    ) {
+      const errorText = await response.text();
+      console.error("Invalid Excel response:", errorText);
+      throw new Error("Server did not return an Excel file.");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "student_attendance.xlsx";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 1000);
+
+  } catch (error) {
+    console.error("Attendance export error:", error);
+    alert("Unable to export attendance. Please try again.");
+  } finally {
+    setExporting(false);
+  }
+};
+
 
   return (
     <AppLayout title="Student's Attendance" role="parent">
@@ -32,13 +96,18 @@ export default function Attendance() {
             Log
           </h1>
         </div>
-        <a href="/attendance/export" className="btn btn-light-success me-3">
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={exporting}
+          className="btn btn-light-success me-3"
+        >
           <i className="ki-duotone ki-exit-up fs-2">
             <span className="path1"></span>
             <span className="path2"></span>
           </i>
-          Export
-        </a>
+          {exporting ? "Exporting..." : "Export"}
+        </button>
       </div>
 
       <div className="card">

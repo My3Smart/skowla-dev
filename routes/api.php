@@ -119,6 +119,7 @@ Route::middleware(['auth:sanctum'])->prefix('portal')->group(function () {
     /* parent */
     Route::get('/parent/dashboard', [\App\Http\Controllers\Api\PortalParentController::class, 'dashboard']);
     Route::get('/parent/attendance', [\App\Http\Controllers\Api\PortalParentController::class, 'attendance']);
+    Route::get('/parent/attendance/export', [\App\Http\Controllers\Api\PortalParentController::class, 'exportAttendance']);
     Route::get('/profile', [\App\Http\Controllers\Api\PortalParentController::class, 'profile']);
     Route::get('/profile/guardian/{guardian}', [\App\Http\Controllers\Api\PortalParentController::class, 'showGuardian']);
     Route::delete('/profile/guardian/{guardian}', [\App\Http\Controllers\Api\PortalParentController::class, 'destroyGuardian']);
