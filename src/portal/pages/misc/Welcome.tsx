@@ -196,8 +196,8 @@ const MY: Record<string, string> = {
 let LANG: "en" | "my" = "en";
 const T = (s: string) => (LANG === "my" ? MY[s] ?? s : s);
 
-const LOGIN_URL = (() => { const h = typeof window !== "undefined" ? window.location.hostname : ""; return h === "skowla.com" || h.endsWith(".skowla.com") || h === "skoola.my" || h.endsWith(".skoola.my") ? "https://login.skowla.com/" : "/login"; })();
-
+// const LOGIN_URL = (() => { const h = typeof window !== "undefined" ? window.location.hostname : ""; return h === "skowla.com" || h.endsWith(".skowla.com") || h === "skoola.my" || h.endsWith(".skoola.my") ? "https://login.skowla.com/" : "/login"; })();
+const LOGIN_URL = "/login";
 export default function Welcome() {
   const ready = useMetronic();
   const [lang, setLang] = useState<"en" | "my">(() => (localStorage.getItem("landing_lang") === "my" ? "my" : "en"));
