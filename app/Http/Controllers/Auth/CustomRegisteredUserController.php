@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use App\Models\Student;
-use App\Services\CbsService;
+use App\Http\Services\CbsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -183,7 +183,8 @@ class CustomRegisteredUserController extends FortifyRegisteredUserController
                     $student->save();
 
                     // Link main parent + additional guardians.
-                    $student->guardians()->attach($guardianIds);
+                    // $student->guardians()->attach($guardianIds);
+                    $student->parents()->attach($guardianIds);
                 }
             }
 

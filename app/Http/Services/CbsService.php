@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Student;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class CbsService
@@ -120,5 +121,73 @@ public function syncDependent(
     }
 
     return $response->json();
+}
+
+public function syncParentWithChildren(User $user): array
+{
+    if (!$user->hasRole('parent')) {
+        throw new \RuntimeException('User is not a parent.');
+    }
+
+    // Synchronize parent and parent wallet.
+    $parentResult = $this->syncUser($user);
+
+    // Find children linked through the guardians table.
+    $guardianStudentIds = collect();
+
+    if (!empty(trim((string) $user->ic))) {
+        $guardianStudentIds = DB::table('guardians')
+            ->where('ic', $user->ic)
+            ->pluck('student_id');
+    }
+
+    // Find children linked through the parent_student pivot.
+    $pivotStudentIds = DB::table('parent_student')
+        ->where('parent_id', $user->id)
+        ->pluck('student_id');
+
+    // Combine both sources and remove duplicates.
+    $studentIds = $guardianStudentIds
+        ->merge($pivotStudentIds)
+        ->filter()
+        ->unique()
+        ->values();
+
+    $students = Student::whereIn('id', $studentIds)->get();
+
+    $synced = 0;
+    $failed = [];
+
+    foreach ($students as $student) {
+        try {
+            $this->syncDependent($user, $student);
+
+            $synced++;
+
+        } catch (\Throwable $e) {
+            $failed[] = $student->id;
+
+            \Log::error('CBS child synchronization failed', [
+                'parent_id' => $user->id,
+                'student_id' => $student->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    \Log::info('CBS parent and children synchronization completed', [
+        'parent_id' => $user->id,
+        'total_students' => $students->count(),
+        'synced_students' => $synced,
+        'failed_students' => $failed,
+    ]);
+
+    return [
+        'success' => empty($failed),
+        'parent' => $parentResult,
+        'total_students' => $students->count(),
+        'synced_students' => $synced,
+        'failed_students' => $failed,
+    ];
 }
 }
