@@ -57,64 +57,95 @@ import Welcome from "./portal/pages/misc/Welcome";
 import Terms from "./portal/pages/misc/Terms";
 import Policy from "./portal/pages/misc/Policy";
 
+// const LoginRedirect = () => {
+//   const hostname = window.location.hostname;
+
+//   if (
+//     hostname === "skowla.com" ||
+//     hostname.endsWith(".skowla.com")
+//   ) {
+//     // window.location.href = "https://login.skowla.com/";
+//     window.location.href = "https://dev.skowla.com/login";
+
+//     return null;
+//   }
+
+//   if (
+//     hostname === "skoola.my" ||
+//     hostname.endsWith(".skoola.my")
+//   ) {
+//     // window.location.href = "https://login.skowla.com/";
+//     window.location.href = "https://dev.skowla.com/login";
+//     return null;
+//   }
+
+//   return <Login />;
+// };
+
+// const LoginRedirect = () => {
+//   const hostname = window.location.hostname;
+
+//   if (hostname === "dev.skowla.com") {
+//     return <Login />;
+//   }
+
+//   if (
+//     hostname === "skowla.com" ||
+//     hostname.endsWith(".skowla.com") ||
+//     hostname === "skoola.my" ||
+//     hostname.endsWith(".skoola.my")
+//   ) {
+//     window.location.href = "https://dev.skowla.com/login";
+//     return null;
+//   }
+
+//   return <Login />;
+// };
+
+// const SchoolLoginRedirect = () => {
+//   const hostname = window.location.hostname;
+
+//   if (
+//     hostname === "skowla.com" ||
+//     hostname.endsWith(".skowla.com")
+//   ) {
+//     window.location.href = "https://school.skowla.com/";
+//     return null;
+//   }
+
+//   if (
+//     hostname === "skoola.my" ||
+//     hostname.endsWith(".skoola.my")
+//   ) {
+//     window.location.href = "https://school.skoola.my/";
+//     return null;
+//   }
+
+//   return <SchoolLogin />;
+// };
+
 const LoginRedirect = () => {
-  const hostname = window.location.hostname;
-
-  if (
-    hostname === "skowla.com" ||
-    hostname.endsWith(".skowla.com")
-  ) {
-    // window.location.href = "https://login.skowla.com/";
-    window.location.href = "https://dev.skowla.com/login";
-
-    return null;
-  }
-
-  if (
-    hostname === "skoola.my" ||
-    hostname.endsWith(".skoola.my")
-  ) {
-    // window.location.href = "https://login.skowla.com/";
-    window.location.href = "https://dev.skowla.com/login";
-    return null;
-  }
-
   return <Login />;
 };
 
 const SchoolLoginRedirect = () => {
-  const hostname = window.location.hostname;
-
-  if (
-    hostname === "skowla.com" ||
-    hostname.endsWith(".skowla.com")
-  ) {
-    window.location.href = "https://school.skowla.com/";
-    return null;
-  }
-
-  if (
-    hostname === "skoola.my" ||
-    hostname.endsWith(".skoola.my")
-  ) {
-    window.location.href = "https://school.skoola.my/";
-    return null;
-  }
-
   return <SchoolLogin />;
 };
 
 const App = () => {
   const hostname = window.location.hostname;
 
-  const isLoginSubdomain =
-    // hostname === "login.skowla.com" ||
-    hostname === "dev.skowla.com/login";
-    // hostname === "login.skoola.my";
+  // const isLoginSubdomain =
+  //   // hostname === "login.skowla.com" ||
+  //   hostname === "dev.skowla.com/login";
+  //   // hostname === "login.skoola.my";
 
-  const isSchoolLoginSubdomain =
-    hostname === "school.skowla.com";
-    // hostname === "school.skoola.my";
+  // const isSchoolLoginSubdomain =
+  //   hostname === "school.skowla.com";
+  //   // hostname === "school.skoola.my";
+
+  const isLoginSubdomain = false;
+  const isSchoolLoginSubdomain = false;
 
   return (
     <BrowserRouter>
