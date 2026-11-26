@@ -64,7 +64,9 @@ const LoginRedirect = () => {
     hostname === "skowla.com" ||
     hostname.endsWith(".skowla.com")
   ) {
-    window.location.href = "https://login.skowla.com/";
+    // window.location.href = "https://login.skowla.com/";
+    window.location.href = "https://dev.skowla.com/login";
+
     return null;
   }
 
@@ -72,7 +74,8 @@ const LoginRedirect = () => {
     hostname === "skoola.my" ||
     hostname.endsWith(".skoola.my")
   ) {
-    window.location.href = "https://login.skowla.com/";
+    // window.location.href = "https://login.skowla.com/";
+    window.location.href = "https://dev.skowla.com/login";
     return null;
   }
 
@@ -105,12 +108,13 @@ const App = () => {
   const hostname = window.location.hostname;
 
   const isLoginSubdomain =
-    hostname === "login.skowla.com" ||
-    hostname === "login.skoola.my";
+    // hostname === "login.skowla.com" ||
+    hostname === "dev.skowla.com/login";
+    // hostname === "login.skoola.my";
 
   const isSchoolLoginSubdomain =
-    hostname === "school.skowla.com" ||
-    hostname === "school.skoola.my";
+    hostname === "school.skowla.com";
+    // hostname === "school.skoola.my";
 
   return (
     <BrowserRouter>

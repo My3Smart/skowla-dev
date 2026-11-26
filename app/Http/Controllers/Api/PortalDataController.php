@@ -14,6 +14,9 @@ use App\Models\StudentRemark;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Guardian;
+use App\Exports\SchoolStudentsExport;
+use App\Exports\StudentImportTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
 /**
@@ -41,7 +44,7 @@ class PortalDataController extends Controller
 
         $attend = (int) ($rows['attend'] ?? 0);
         $absent = (int) ($rows['absent'] ?? 0);
-        $total  = $attend + $absent;
+        $total = $attend + $absent;
 
         return $total > 0 ? round(($attend / $total) * 100, 1) : 0.0;
     }
@@ -87,31 +90,52 @@ class PortalDataController extends Controller
             $base = ClassAttendance::where('grade', $class->grade_name)
                 ->where('class_name', $class->class_name);
 
-            if (! (clone $base)->exists()) {
+            if (!(clone $base)->exists()) {
                 $attendanceData[$class->class_name] = null;
                 continue;
             }
 
             $counts = function ($query) {
                 $present = (clone $query)->where('status', 'Present')->count();
-                $absent  = (clone $query)->where('status', 'Absent')->count();
-                $total   = (clone $query)->count();
+                $absent = (clone $query)->where('status', 'Absent')->count();
+                $total = (clone $query)->count();
 
                 return [$present, $absent, max($total - $present - $absent, 0)];
             };
 
             $attendanceData[$class->class_name] = [
-                'daily'   => $counts((clone $base)->whereDate('attendance_time', now())),
-                'weekly'  => $counts((clone $base)->whereBetween('attendance_time', [now()->startOfWeek(), now()->endOfWeek()])),
+                'daily' => $counts((clone $base)->whereDate('attendance_time', now())),
+                'weekly' => $counts((clone $base)->whereBetween('attendance_time', [now()->startOfWeek(), now()->endOfWeek()])),
                 'monthly' => $counts((clone $base)->whereMonth('attendance_time', now()->month)),
             ];
         }
 
         return response()->json([
-            'classes'        => (object) $classes,
+            'classes' => (object) $classes,
             'attendanceData' => (object) $attendanceData,
         ]);
     }
+
+
+public function exportSchoolStudents(Request $request)
+{
+    $user = $request->user();
+
+    if (!$user || !$user->hasRole('school') || !$user->school_id) {
+        return response()->json([
+            'message' => 'Unauthorized.',
+        ], 403);
+    }
+
+    $schoolId = (int) $user->school_id;
+
+    return Excel::download(
+        new SchoolStudentsExport($schoolId),
+        'school_students.xlsx',
+        \Maatwebsite\Excel\Excel::XLSX
+    );
+}
+
 
     /** School dashboard totals. */
     public function schoolDashboard(Request $request, $school = null)
@@ -119,16 +143,16 @@ class PortalDataController extends Controller
         $user = $request->user();
         $schoolId = (int) ($school ?: $user->school_id ?: $this->userMeta($user, 'user_school_id'));
 
-        if (! $schoolId) {
+        if (!$schoolId) {
             return response()->json(['totalPelajar' => 0, 'formattedAttendancePercentageSchool' => 0, 'school_id' => null]);
         }
 
         $model = School::find($schoolId);
 
         return response()->json([
-            'school_id'                           => $schoolId,
-            'school_name'                         => $model?->name,
-            'totalPelajar'                        => Student::where('school_id', $schoolId)->count(),
+            'school_id' => $schoolId,
+            'school_name' => $model?->name,
+            'totalPelajar' => Student::where('school_id', $schoolId)->count(),
             'formattedAttendancePercentageSchool' => $this->schoolPercentage($schoolId),
         ]);
     }
@@ -140,26 +164,26 @@ class PortalDataController extends Controller
         $districtId = (int) ($ppd ?: $this->userMeta($user, 'user_district_id'));
         $district = District::find($districtId);
 
-        if (! $district) {
+        if (!$district) {
             return response()->json(['schools' => [], 'totalPelajarPPD' => 0, 'formattedAttendancePercentagePPD' => 0]);
         }
 
         $schools = School::where('district_id', $district->id)->orderBy('name')->get()
-            ->map(fn (School $s) => [
-                'id'                 => $s->id,
-                'name'               => $s->name,
-                'totalStudents'      => Student::where('school_id', $s->id)->count(),
-                'attendancePercent'  => $this->schoolPercentage($s->id),
+            ->map(fn(School $s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'totalStudents' => Student::where('school_id', $s->id)->count(),
+                'attendancePercent' => $this->schoolPercentage($s->id),
             ]);
 
         $studentIds = Student::whereIn('school_id', $schools->pluck('id'))->pluck('id');
 
         return response()->json([
-            'ppd'                             => ['ppd' => $district->ppd],
-            'ppd_id'                          => $district->id,
-            'totalPelajarPPD'                 => $studentIds->count(),
-            'formattedAttendancePercentagePPD'=> $this->attendancePercentage($studentIds),
-            'schools'                         => $schools,
+            'ppd' => ['ppd' => $district->ppd],
+            'ppd_id' => $district->id,
+            'totalPelajarPPD' => $studentIds->count(),
+            'formattedAttendancePercentagePPD' => $this->attendancePercentage($studentIds),
+            'schools' => $schools,
         ]);
     }
 
@@ -170,7 +194,7 @@ class PortalDataController extends Controller
         $stateId = (int) ($state ?: $this->userMeta($user, 'user_state_id') ?: $user->state_id);
         $model = State::find($stateId);
 
-        if (! $model) {
+        if (!$model) {
             return response()->json(['districts' => [], 'totalPelajar' => 0, 'formattedAttendancePercentageState' => 0]);
         }
 
@@ -179,9 +203,9 @@ class PortalDataController extends Controller
                 $ids = Student::whereIn('school_id', School::where('district_id', $d->id)->pluck('id'))->pluck('id');
 
                 return [
-                    'id'                => $d->id,
-                    'ppd'               => $d->ppd,
-                    'totalStudents'     => $ids->count(),
+                    'id' => $d->id,
+                    'ppd' => $d->ppd,
+                    'totalStudents' => $ids->count(),
                     'attendancePercent' => $this->attendancePercentage($ids),
                 ];
             });
@@ -189,11 +213,11 @@ class PortalDataController extends Controller
         $studentIds = Student::where('state_id', $model->id)->pluck('id');
 
         return response()->json([
-            'state'                             => ['name' => $model->name],
-            'state_id'                          => $model->id,
-            'totalPelajar'                      => $studentIds->count(),
-            'formattedAttendancePercentageState'=> $this->attendancePercentage($studentIds),
-            'districts'                         => $districts,
+            'state' => ['name' => $model->name],
+            'state_id' => $model->id,
+            'totalPelajar' => $studentIds->count(),
+            'formattedAttendancePercentageState' => $this->attendancePercentage($studentIds),
+            'districts' => $districts,
         ]);
     }
 
@@ -204,9 +228,9 @@ class PortalDataController extends Controller
             $ids = Student::where('state_id', $s->id)->pluck('id');
 
             return [
-                'id'                => $s->id,
-                'name'              => $s->name,
-                'totalStudents'     => $ids->count(),
+                'id' => $s->id,
+                'name' => $s->name,
+                'totalStudents' => $ids->count(),
                 'attendancePercent' => $this->attendancePercentage($ids),
             ];
         });
@@ -214,8 +238,8 @@ class PortalDataController extends Controller
         $allIds = Student::pluck('id');
 
         return response()->json([
-            'states'                              => $states,
-            'totalPelajar'                        => $allIds->count(),
+            'states' => $states,
+            'totalPelajar' => $allIds->count(),
             'formattedAttendancePercentageCountry' => $this->attendancePercentage($allIds),
         ]);
     }
@@ -227,25 +251,27 @@ class PortalDataController extends Controller
     private function serializeStudent(Student $s): array
     {
         return [
-            'id'            => $s->id,
-            'name'          => $s->name,
-            'ic'            => $s->ic,
+            'id' => $s->id,
+            'name' => $s->name,
+            'ic' => $s->ic,
             'birth_cert_no' => $s->birth_cert_no,
-            'dob'           => $s->dob,
-            'gender'        => $s->gender,
-            'grade'         => $s->grade,
-            'class_name'    => $s->class_name,
-            'race'          => $s->race,
-            'religion'      => $s->religion,
-            'nationality'   => $s->nationality,
-            'address'       => $s->address,
-            'age'           => $s->age,
-            'status'        => $s->status,
-            'session'       => $s->session,
-            'state_id'      => $s->state_id,
-            'district_id'   => $s->district_id,
-            'school_id'     => $s->school_id,
-            'school_name'   => $s->school?->name,
+            'dob' => $s->dob,
+            'gender' => $s->gender,
+            'grade' => $s->grade,
+            'class_name' => $s->class_name,
+            'race' => $s->race,
+            'religion' => $s->religion,
+            'nationality' => $s->nationality,
+            'address' => $s->address,
+            'age' => $s->age,
+            'orphan' => $s->orphan,
+            'oku' => $s->oku,
+            'status' => $s->status,
+            'session' => $s->session,
+            'state_id' => $s->state_id,
+            'district_id' => $s->district_id,
+            'school_id' => $s->school_id,
+            'school_name' => $s->school?->name,
         ];
     }
 
@@ -256,7 +282,7 @@ class PortalDataController extends Controller
         $query = Student::query()->with('school');
 
         if ($user->hasRole('parent')) {
-            $query->whereHas('parents', fn ($q) => $q->where('users.id', $user->id));
+            $query->whereHas('parents', fn($q) => $q->where('users.id', $user->id));
         } elseif ($user->hasRole('school|teacher')) {
             $schoolId = $user->school_id ?: $this->userMeta($user, 'user_school_id');
             if ($schoolId) {
@@ -265,7 +291,7 @@ class PortalDataController extends Controller
         }
 
         if ($search = $request->query('search')) {
-            $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('ic', 'like', "%{$search}%"));
+            $query->where(fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('ic', 'like', "%{$search}%"));
         }
         if ($grade = $request->query('grade')) {
             $query->where('grade', $grade);
@@ -278,7 +304,7 @@ class PortalDataController extends Controller
         }
 
         return response()->json([
-            'students' => $query->orderBy('name')->get()->map(fn (Student $s) => $this->serializeStudent($s)),
+            'students' => $query->orderBy('name')->get()->map(fn(Student $s) => $this->serializeStudent($s)),
         ]);
     }
 
@@ -288,165 +314,233 @@ class PortalDataController extends Controller
     }
 
     private function studentRules(): array
-{
-    return [
-        // Student
-        'name'          => ['required', 'string', 'max:255'],
-        'ic'            => ['nullable', 'string', 'max:255'],
-        'birth_cert_no' => ['nullable', 'string', 'max:255'],
-        'dob'           => ['nullable', 'date'],
-        'gender'        => ['nullable', 'string', 'max:50'],
-        'grade'         => ['nullable', 'string', 'max:100'],
-        'class_name'    => ['nullable', 'string', 'max:100'],
-        'race'          => ['nullable', 'string', 'max:100'],
-        'religion'      => ['nullable', 'string', 'max:100'],
-        'nationality'   => ['nullable', 'string', 'max:100'],
-        'address'       => ['nullable', 'string'],
-        'age'           => ['nullable', 'integer'],
-        'session'       => ['nullable', 'string', 'max:100'],
-        'status'        => ['nullable', 'string', 'max:100'],
-        'state_id'      => ['nullable', 'exists:states,id'],
-        'district_id'   => ['nullable', 'exists:districts,id'],
-        'school_id'     => ['nullable', 'exists:schools,id'],
+    {
+        return [
+            // Student
+            'name' => ['required', 'string', 'max:255'],
+            'ic' => ['nullable', 'string', 'max:255'],
+            'birth_cert_no' => ['nullable', 'string', 'max:255'],
+            'dob' => ['nullable', 'date'],
+            'gender' => ['nullable', 'string', 'max:50'],
+            'grade' => ['nullable', 'string', 'max:100'],
+            'class_name' => ['nullable', 'string', 'max:100'],
+            'race' => ['nullable', 'string', 'max:100'],
+            'religion' => ['nullable', 'string', 'max:100'],
+            'nationality' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string'],
+            'age' => ['nullable', 'integer'],
+            'session' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'string', 'max:100'],
+            'state_id' => ['nullable', 'exists:states,id'],
+            'district_id' => ['nullable', 'exists:districts,id'],
+            'school_id' => ['nullable', 'exists:schools,id'],
 
-        // Extra student fields
-        'orphan'        => ['nullable', 'string', 'max:20'],
-        'oku'           => ['nullable', 'string', 'max:20'],
+            // Extra student fields
+            'orphan' => ['nullable', 'string', 'max:20'],
+            'oku' => ['nullable', 'string', 'max:20'],
 
-        // Father
-        'father_name' => [
-            'nullable',
-            'required_without_all:mother_name,guardian_name',
-            'string',
-            'max:255',
-        ],
-        'father_ic'     => ['nullable', 'string', 'max:255'],
-        'father_phone'  => ['nullable', 'string', 'max:50'],
-        'father_email'  => ['nullable', 'email', 'max:255'],
+            // Father
+            'father_name' => [
+                'nullable',
+                'required_without_all:mother_name,guardian_name',
+                'required_with:father_ic,father_phone,father_email',
+                'string',
+                'max:255',
+            ],
+            'father_ic' => ['nullable', 'string', 'max:255'],
+            'father_phone' => ['nullable', 'string', 'max:50'],
+            'father_email' => ['nullable', 'email', 'max:255'],
 
-        // Mother
-        'mother_name' => [
-            'nullable',
-            'required_without_all:father_name,guardian_name',
-            'string',
-            'max:255',
-        ],
-        'mother_ic'     => ['nullable', 'string', 'max:255'],
-        'mother_phone'  => ['nullable', 'string', 'max:50'],
-        'mother_email'  => ['nullable', 'email', 'max:255'],
+            // Mother
+            'mother_name' => [
+                'nullable',
+                'required_without_all:father_name,guardian_name',
+                'required_with:mother_ic,mother_phone,mother_email',
+                'string',
+                'max:255',
+            ],
+            'mother_ic' => ['nullable', 'string', 'max:255'],
+            'mother_phone' => ['nullable', 'string', 'max:50'],
+            'mother_email' => ['nullable', 'email', 'max:255'],
 
-        // Guardian
-        'guardian_name' => [
-            'nullable',
-            'required_without_all:father_name,mother_name',
-            'string',
-            'max:255',
-        ],
-        'guardian_ic'    => ['nullable', 'string', 'max:255'],
-        'guardian_phone' => ['nullable', 'string', 'max:50'],
-        'guardian_email' => ['nullable', 'email', 'max:255'],
-    ];
-}
+            // Guardian
+            'guardian_name' => [
+                'nullable',
+                'required_without_all:father_name,mother_name',
+                'required_with:guardian_ic,guardian_phone,guardian_email',
+                'string',
+                'max:255',
+            ],
+            'guardian_ic' => ['nullable', 'string', 'max:255'],
+            'guardian_phone' => ['nullable', 'string', 'max:50'],
+            'guardian_email' => ['nullable', 'email', 'max:255'],
+        ];
+    }
 
-public function storeStudent(Request $request)
-{
-    $validated = $request->validate($this->studentRules());
+    public function storeStudent(Request $request)
+    {
+        $rules = $this->studentRules();
 
-    return DB::transaction(function () use ($request, $validated) {
+        // Allow each parent/guardian section to be optional,
+// but require a name if any details in that section are entered.
+        foreach (['father', 'mother', 'guardian'] as $type) {
+            $rules["{$type}_name"] = [
+                'nullable',
+                'string',
+                'max:255',
+                "required_with:{$type}_ic,{$type}_phone,{$type}_email",
+            ];
 
-        $user = $request->user();
-
-        $studentData = collect($validated)->only([
-            'name',
-            'ic',
-            'birth_cert_no',
-            'dob',
-            'gender',
-            'grade',
-            'class_name',
-            'race',
-            'religion',
-            'nationality',
-            'address',
-            'age',
-            'session',
-            'status',
-            'state_id',
-            'district_id',
-            'school_id',
-            'orphan',
-            'oku',
-        ])->toArray();
-
-        // Force school_id from logged-in school user
-        if ($user->hasRole('school')) {
-            $studentData['school_id'] = $user->school_id;
+            $rules["{$type}_ic"] = ['nullable', 'string', 'max:50'];
+            $rules["{$type}_phone"] = ['nullable', 'string', 'max:30'];
+            $rules["{$type}_email"] = ['nullable', 'email', 'max:255'];
         }
 
-        // Calculate age from DOB if age wasn't submitted
-        if (
-            empty($studentData['age']) &&
-            !empty($studentData['dob'])
-        ) {
-            $studentData['age'] = \Carbon\Carbon::parse(
-                $studentData['dob']
-            )->age;
-        }
+        $validator = \Illuminate\Support\Facades\Validator::make(
+            $request->all(),
+            $rules
+        );
 
-        $student = Student::create($studentData);
+        $validator->after(function ($validator) use ($request) {
+            if (
+                !$request->filled('father_name') &&
+                !$request->filled('mother_name') &&
+                !$request->filled('guardian_name')
+            ) {
+                $validator->errors()->add(
+                    'parent_guardian',
+                    'Please provide at least one parent or guardian.'
+                );
+            }
+        });
 
-        if (!empty($validated['father_name'])) {
-            Guardian::create([
-                'student_id' => $student->id,
-                'type'       => 'father',
-                'name'       => $validated['father_name'],
-                'ic'         => $validated['father_ic'] ?? null,
-                'phone'      => $validated['father_phone'] ?? null,
-                'email'      => $validated['father_email'] ?? null,
-            ]);
-        }
+        $validated = $validator->validate();
 
-        if (!empty($validated['mother_name'])) {
-            Guardian::create([
-                'student_id' => $student->id,
-                'type'       => 'mother',
-                'name'       => $validated['mother_name'],
-                'ic'         => $validated['mother_ic'] ?? null,
-                'phone'      => $validated['mother_phone'] ?? null,
-                'email'      => $validated['mother_email'] ?? null,
-            ]);
-        }
+        return DB::transaction(function () use ($request, $validated) {
 
-        if (!empty($validated['guardian_name'])) {
-            Guardian::create([
-                'student_id' => $student->id,
-                'type'       => 'guardian',
-                'name'       => $validated['guardian_name'],
-                'ic'         => $validated['guardian_ic'] ?? null,
-                'phone'      => $validated['guardian_phone'] ?? null,
-                'email'      => $validated['guardian_email'] ?? null,
-            ]);
-        }
+            $user = $request->user();
 
-        if ($user->hasRole('parent')) {
-            $student->parents()->syncWithoutDetaching([
-                $user->id
-            ]);
-        }
+            $studentData = collect($validated)->only([
+                'name',
+                'ic',
+                'birth_cert_no',
+                'dob',
+                'gender',
+                'grade',
+                'class_name',
+                'race',
+                'religion',
+                'nationality',
+                'address',
+                'age',
+                'session',
+                'status',
+                'state_id',
+                'district_id',
+                'school_id',
+                'orphan',
+                'oku',
+            ])->toArray();
 
-        return response()->json([
-            'student' => $this->serializeStudent($student),
-            'success' => 'Student and guardian information saved.',
-        ], 201);
-    });
-}
+            // Force school_id from logged-in school user
+            if ($user->hasRole('school')) {
+                $studentData['school_id'] = $user->school_id;
+            }
+
+            // Calculate age from DOB if age wasn't submitted
+            if (
+                empty($studentData['age']) &&
+                !empty($studentData['dob'])
+            ) {
+                $studentData['age'] = \Carbon\Carbon::parse(
+                    $studentData['dob']
+                )->age;
+            }
+
+            $student = Student::create($studentData);
+
+            if (!empty($validated['father_name'])) {
+                Guardian::create([
+                    'student_id' => $student->id,
+                    'type' => 'father',
+                    'name' => $validated['father_name'],
+                    'ic' => $validated['father_ic'] ?? null,
+                    'phone' => $validated['father_phone'] ?? null,
+                    'email' => $validated['father_email'] ?? null,
+                ]);
+            }
+
+            if (!empty($validated['mother_name'])) {
+                Guardian::create([
+                    'student_id' => $student->id,
+                    'type' => 'mother',
+                    'name' => $validated['mother_name'],
+                    'ic' => $validated['mother_ic'] ?? null,
+                    'phone' => $validated['mother_phone'] ?? null,
+                    'email' => $validated['mother_email'] ?? null,
+                ]);
+            }
+
+            if (!empty($validated['guardian_name'])) {
+                Guardian::create([
+                    'student_id' => $student->id,
+                    'type' => 'guardian',
+                    'name' => $validated['guardian_name'],
+                    'ic' => $validated['guardian_ic'] ?? null,
+                    'phone' => $validated['guardian_phone'] ?? null,
+                    'email' => $validated['guardian_email'] ?? null,
+                ]);
+            }
+
+            if ($user->hasRole('parent')) {
+                $student->parents()->syncWithoutDetaching([
+                    $user->id
+                ]);
+            }
+
+            return response()->json([
+                'student' => $this->serializeStudent($student),
+                'success' => 'Student and guardian information saved.',
+            ], 201);
+        });
+    }
 
     public function updateStudent(Request $request, Student $student)
-    {
-        $student->update($request->validate($this->studentRules()));
+{
+    // Get existing student validation rules
+    $rules = $this->studentRules();
 
-        return response()->json(['student' => $this->serializeStudent($student), 'success' => 'Student updated.']);
+    // Remove guardian fields from student update validation
+    foreach ([
+        'father_name',
+        'father_ic',
+        'father_phone',
+        'father_email',
+
+        'mother_name',
+        'mother_ic',
+        'mother_phone',
+        'mother_email',
+
+        'guardian_name',
+        'guardian_ic',
+        'guardian_phone',
+        'guardian_email',
+    ] as $field) {
+        unset($rules[$field]);
     }
+
+    // Validate student information only
+    $validated = $request->validate($rules);
+
+    // Update student
+    $student->update($validated);
+
+    return response()->json([
+        'student' => $this->serializeStudent($student->fresh()->load('school')),
+        'success' => 'Student updated successfully.',
+    ]);
+}
 
     public function destroyStudent(Student $student)
     {
@@ -484,26 +578,26 @@ public function storeStudent(Request $request)
         $user = $request->user();
         $schoolId = $user->school_id ?: $this->userMeta($user, 'user_school_id');
 
-        $classes = SchoolClass::with('grade')->get()->map(fn (SchoolClass $c) => [
+        $classes = SchoolClass::with('grade')->get()->map(fn(SchoolClass $c) => [
             'class_name' => $c->class_name,
-            'grade'      => ['grade_name' => $c->grade?->grade_name],
+            'grade' => ['grade_name' => $c->grade?->grade_name],
         ])->values();
 
         $grades = $classes->pluck('grade.grade_name')->filter()->unique()->values();
 
-        $grade   = $request->query('grade');
-        $class   = $request->query('class_name');
+        $grade = $request->query('grade');
+        $class = $request->query('class_name');
         $subject = $request->query('subject');
 
         $payload = [
-            'grades'          => $grades,
-            'classes'         => $classes,
-            'selectedGrade'   => $grade,
-            'selectedClass'   => $class,
+            'grades' => $grades,
+            'classes' => $classes,
+            'selectedGrade' => $grade,
+            'selectedClass' => $class,
             'selectedSubject' => $subject,
         ];
 
-        if (! $grade || ! $class) {
+        if (!$grade || !$class) {
             return response()->json($payload + ['students' => [], 'attendanceRecords' => (object) [], 'subjectOrder' => (object) []]);
         }
 
@@ -528,7 +622,7 @@ public function storeStudent(Request $request)
         foreach ($records->pluck('subject')->filter()->unique()->values() as $index => $subj) {
             $subjectOrder[$subj] = $index + 1;
         }
-        if ($subject && ! isset($subjectOrder[$subject])) {
+        if ($subject && !isset($subjectOrder[$subject])) {
             $subjectOrder[$subject] = count($subjectOrder) + 1;
         }
 
@@ -540,10 +634,10 @@ public function storeStudent(Request $request)
         }
 
         return response()->json($payload + [
-            'existingAttendance'   => (object) $existing,
-            'students'             => $students,
-            'attendanceRecords'    => (object) $attendanceRecords,
-            'subjectOrder'         => (object) $subjectOrder,
+            'existingAttendance' => (object) $existing,
+            'students' => $students,
+            'attendanceRecords' => (object) $attendanceRecords,
+            'subjectOrder' => (object) $subjectOrder,
             'teacherHasAttendance' => $records->where('teacher_id', $user->id)->isNotEmpty(),
         ]);
     }
@@ -552,9 +646,9 @@ public function storeStudent(Request $request)
     public function saveClassAttendance(Request $request)
     {
         $data = $request->validate([
-            'grade'      => ['required', 'string'],
+            'grade' => ['required', 'string'],
             'class_name' => ['required', 'string'],
-            'subject'    => ['required', 'string'],
+            'subject' => ['required', 'string'],
             'attendance' => ['required', 'array'],
         ]);
 
@@ -566,13 +660,13 @@ public function storeStudent(Request $request)
             ClassAttendance::updateOrCreate(
                 [
                     'student_id' => $studentId,
-                    'grade'      => $data['grade'],
+                    'grade' => $data['grade'],
                     'class_name' => $data['class_name'],
-                    'subject'    => $data['subject'],
+                    'subject' => $data['subject'],
                     'teacher_id' => $request->user()->id,
                 ],
                 [
-                    'status'          => $status,
+                    'status' => $status,
                     'attendance_time' => now(),
                 ],
             );
@@ -580,4 +674,21 @@ public function storeStudent(Request $request)
 
         return response()->json(['success' => 'Attendance saved.']);
     }
+
+    public function downloadStudentTemplate(Request $request)
+{
+    $user = $request->user();
+
+    if (!$user || !$user->hasRole('school')) {
+        return response()->json([
+            'message' => 'Unauthorized.',
+        ], 403);
+    }
+
+    return Excel::download(
+        new StudentImportTemplateExport(),
+        'student_import_template.xlsx',
+        \Maatwebsite\Excel\Excel::XLSX
+    );
+}
 }

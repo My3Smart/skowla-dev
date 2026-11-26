@@ -118,3 +118,67 @@ export async function api<T = unknown>(
 
   return data as T;
 }
+
+
+  export async function apiDownload(
+    path: string,
+    filename: string
+  ): Promise<void> {
+    const csrfToken = getCookie("XSRF-TOKEN");
+    const bearer = getToken();
+
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "X-Requested-With": "XMLHttpRequest",
+        ...(csrfToken ? { "X-XSRF-TOKEN": csrfToken } : {}),
+        ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      console.error("Download error:", response.status, message);
+
+      throw new Error(`Download failed: ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (
+      !contentType.includes(
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      ) &&
+      !contentType.includes("application/octet-stream")
+    ) {
+      const text = await response.text();
+      console.error("Unexpected download response:", text.slice(0, 1000));
+      throw new Error("Server did not return an Excel file.");
+    }
+
+    const blob = await response.blob();
+
+    const signature = new Uint8Array(
+      await blob.slice(0, 4).arrayBuffer()
+    );
+
+    if (signature[0] !== 0x50 || signature[1] !== 0x4b) {
+      throw new Error("Downloaded file is not a valid XLSX container.");
+    }
+
+    const url = window.URL.createObjectURL(blob);
+
+    try {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } finally {
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    }
+  }

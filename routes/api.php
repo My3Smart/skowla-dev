@@ -111,7 +111,8 @@ Route::middleware(['auth:sanctum'])->prefix('portal')->group(function () {
     Route::get('/students/{student}', [\App\Http\Controllers\Api\PortalDataController::class, 'showStudent']);
     Route::put('/students/{student}', [\App\Http\Controllers\Api\PortalDataController::class, 'updateStudent']);
     Route::delete('/students/{student}', [\App\Http\Controllers\Api\PortalDataController::class, 'destroyStudent']);
-
+    Route::get('/school/students/export', [\App\Http\Controllers\Api\PortalDataController::class, 'exportSchoolStudents']);    
+    Route::get('/students/template/download',[\App\Http\Controllers\Api\PortalDataController::class, 'downloadStudentTemplate']);
     /* class attendance */
     Route::get('/class-attendance', [\App\Http\Controllers\Api\PortalDataController::class, 'classAttendance']);
     Route::post('/class-attendance', [\App\Http\Controllers\Api\PortalDataController::class, 'saveClassAttendance']);

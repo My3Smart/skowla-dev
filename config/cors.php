@@ -22,6 +22,7 @@ return [
         'http://127.0.0.1:4200',
         'https://skowla.com',
         'https://login.skowla.com',
+        'https://dev.skowla.com/login',
     ],
 
     'allowed_origins_patterns' => [],

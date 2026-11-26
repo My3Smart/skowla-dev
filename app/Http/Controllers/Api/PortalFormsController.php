@@ -543,14 +543,46 @@ class PortalFormsController extends Controller
 
     /* ------------------------------ import ------------------------------ */
 
-    public function importStudents(Request $request)
-    {
-        $request->validate(['import_file' => ['required', 'file', 'mimes:xlsx,xls,csv']]);
+    
+public function importStudents(Request $request)
+{
+    $user = $request->user();
 
-        Excel::import(new StudentsImport, $request->file('import_file'));
-
-        return response()->json(['success' => 'Import successful.']);
+    if (!$user || !$user->hasRole('school') || !$user->school_id) {
+        return response()->json([
+            'message' => 'Unauthorized. School account required.',
+        ], 403);
     }
+
+    $request->validate([
+        'import_file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+    ]);
+
+    $schoolId = (int) $user->school_id;
+
+    try {
+        Excel::import(
+            new StudentsImport($schoolId),
+            $request->file('import_file')
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Students imported successfully.',
+        ]);
+
+    } catch (\Throwable $e) {
+        \Log::error('Student import failed', [
+            'school_id' => $schoolId,
+            'error' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'message' => 'Unable to import students. Please check the Excel file or server logs.',
+        ], 500);
+    }
+}
+
 
     /* ------------------------- teacher edit view ------------------------ */
 

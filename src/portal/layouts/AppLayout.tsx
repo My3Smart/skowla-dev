@@ -114,7 +114,10 @@ export function AppLayout({
 
             {/*begin::Logo*/}
             <div className="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-15">
-              <Link to="/dashboard" className="d-flex align-items-center">
+              <Link
+                to={menu[0]?.to ?? "/dashboard"}
+                className="d-flex align-items-center"
+              >
                 <img
                   alt="Skoola Logo"
                   src="/assets/media/auth/skowla-owl-logo.png"
@@ -147,20 +150,30 @@ export function AppLayout({
                 <div
                   className="menu menu-rounded menu-column menu-lg-row my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0"
                   id="kt_app_header_menu"
-                  data-kt-menu="true"
                 >
-                  {menu.map((item) => (
-                    <div
-                      key={item.to}
-                      className={`menu-item here menu-here-bg menu-lg-down-accordion me-0 me-lg-2 ${
-                        location.pathname === item.to ? "here show" : ""
-                      }`}
-                    >
-                      <Link className="menu-link" to={item.to}>
-                        <span className="menu-title">{item.label}</span>
-                      </Link>
-                    </div>
-                  ))}
+                  {menu.map((item) => {
+                    const isActive =
+                      location.pathname === item.to ||
+                      location.pathname.startsWith(item.to + "/");
+
+                    return (
+                      <div
+                        key={item.to}
+                        className={`menu-item menu-lg-down-accordion me-0 me-lg-2 ${
+                          isActive ? "here" : ""
+                        }`}
+                      >
+                        <Link
+                          className={`menu-link ${isActive ? "active" : ""}`}
+                          to={item.to}
+                        >
+                          <span className="menu-title">
+                            {item.label}
+                          </span>
+                        </Link>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               {/*end::Menu wrapper*/}

@@ -21,6 +21,7 @@ interface StudentDetail {
   oku?: string;
   status?: string;
   school?: { name: string };
+  school_name?: string | null;
 }
 
 export default function StudentDetails() {
@@ -83,7 +84,10 @@ export default function StudentDetails() {
                       )}
                     </td>
                   </tr>
-                  <tr><th>School</th><td>{student.school?.name ?? "N/A"}</td></tr>
+                  <tr>
+                    <th>School</th>
+                    <td>{student.school_name ?? "N/A"}</td>
+                  </tr>
                 </tbody>
               </table>
 

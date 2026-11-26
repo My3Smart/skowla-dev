@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/portal/layouts/AppLayout";
 import { Card } from "@/portal/components/Card";
-import { api } from "@/portal/api";
+import { api, apiDownload } from "@/portal/api";
 import { useAuth } from "@/portal/auth";
 
 interface Student {
@@ -33,6 +33,9 @@ export default function StudentManagement() {
   const [loading, setLoading] = useState(true);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) {
@@ -78,6 +81,112 @@ export default function StudentManagement() {
     };
   }, [authLoading, schoolId, user]);
 
+
+  async function handleExport() {
+    if (exporting) return;
+
+    setExporting(true);
+
+    try {
+      await apiDownload(
+        "/api/portal/school/students/export",
+        "school_students.xlsx"
+      );
+
+      console.log("Students exported successfully.");
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Unable to export students. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleDownloadTemplate() {
+    console.log("Downloading student template...");
+
+    try {
+      await apiDownload(
+        "/api/portal/students/template/download",
+        "student_import_template.xlsx"
+      );
+
+      console.log("Template downloaded successfully.");
+    } catch (error) {
+      console.error("TEMPLATE DOWNLOAD ERROR:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to download student template."
+      );
+    }
+  }
+
+
+async function handleImportStudents(
+  e: React.FormEvent<HTMLFormElement>
+) {
+  e.preventDefault();
+
+  if (importing) return;
+
+  if (!schoolId) {
+    setImportError("School ID is missing.");
+    return;
+  }
+
+  const formData = new FormData(e.currentTarget);
+  const file = formData.get("import_file");
+
+  if (!(file instanceof File) || file.size === 0) {
+    setImportError("Please select an Excel file.");
+    return;
+  }
+
+  formData.set("school_id", String(schoolId));
+
+  setImporting(true);
+  setImportError(null);
+  setSuccessMsg(null);
+
+  try {
+    console.log("Importing students...");
+
+    const result = await api(
+      "/api/portal/students/import",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    console.log("Import response:", result);
+
+    // Refresh the student list.
+    const updated = await api<ManagementData>(
+      `/api/portal/schools/${schoolId}/students/management`
+    );
+
+    setSchool(updated.school ?? null);
+    setStudents(updated.students ?? []);
+
+    setSuccessMsg("Students imported successfully.");
+    setShowImport(false);
+  } catch (error) {
+    console.error("STUDENT IMPORT ERROR:", error);
+
+    setImportError(
+      error instanceof Error
+        ? error.message
+        : "Unable to import students."
+    );
+  } finally {
+    setImporting(false);
+  }
+}
+
+
+
   return (
     <AppLayout title="Student Management" role="school">
       <Card>
@@ -110,9 +219,15 @@ export default function StudentManagement() {
               </ul>
             </div>
 
-            <a href={`/dashboard/school_export/${schoolId}`} className="btn btn-light-success">
-              <i className="ki-duotone ki-exit-up fs-2"></i> Export
-            </a>
+            <button
+              type="button"
+              className="btn btn-light-success"
+              onClick={handleExport}
+              disabled={exporting || loading || !schoolId}
+            >
+              <i className="ki-duotone ki-exit-up fs-2"></i>
+              {exporting ? "Exporting..." : "Export"}
+            </button>
           </div>
 
           {successMsg && (
@@ -163,42 +278,114 @@ export default function StudentManagement() {
           )}
         </div>
 
-        <div className={`modal fade ${showImport ? "show d-block" : ""}`} tabIndex={-1} aria-hidden={!showImport}>
-          <div className="modal-dialog">
-            <form
-              className="modal-content"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                try {
-                  await api("/api/portal/students/import", { method: "POST", body: fd });
-                  setSuccessMsg("Import successful.");
-                  setShowImport(false);
-                } catch {
-                  /* ignore */
-                }
-              }}
-            >
-              <div className="modal-header">
-                <h5 className="modal-title">Import Students From Excel</h5>
-                <button type="button" className="btn-close" onClick={() => setShowImport(false)}></button>
-              </div>
-              <div className="modal-body">
-                <p className="mb-3">Please use the provided template.</p>
-                <a href="/school/students/template" className="btn btn-link">Download Template</a>
-                <div className="mb-3">
-                  <label htmlFor="import_file" className="form-label">Upload Excel File</label>
-                  <input type="file" className="form-control" id="import_file" name="import_file" accept=".xlsx, .xls" required />
-                </div>
-              </div>
-              <input type="hidden" name="school_id" value={schoolId} />
-              <div className="modal-footer">
-                <button type="submit" className="btn btn-primary">Import</button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowImport(false)}>Cancel</button>
-              </div>
-            </form>
-          </div>
+        
+<div
+  className={`modal fade ${showImport ? "show d-block" : ""}`}
+  tabIndex={-1}
+  aria-hidden={!showImport}
+>
+  <div className="modal-dialog">
+    <form
+      className="modal-content"
+      onSubmit={handleImportStudents}
+      encType="multipart/form-data"
+    >
+      <div className="modal-header">
+        <h5 className="modal-title">
+          Import Students From Excel
+        </h5>
+
+        <button
+          type="button"
+          className="btn-close"
+          disabled={importing}
+          onClick={() => {
+            setImportError(null);
+            setShowImport(false);
+          }}
+        />
+      </div>
+
+      <div className="modal-body">
+        <p className="mb-3">
+          Please use the provided template.
+        </p>
+
+        <button
+          type="button"
+          className="btn btn-link p-0 mb-4"
+          onClick={handleDownloadTemplate}
+        >
+          Download Template
+        </button>
+
+        <div className="mb-3">
+          <label
+            htmlFor="import_file"
+            className="form-label"
+          >
+            Upload Excel File
+          </label>
+
+          <input
+            type="file"
+            className="form-control"
+            id="import_file"
+            name="import_file"
+            accept=".xlsx,.xls"
+            disabled={importing}
+            required
+          />
         </div>
+
+        {importError && (
+          <div
+            className="alert alert-danger mt-3"
+            role="alert"
+          >
+            {importError}
+          </div>
+        )}
+      </div>
+
+      <input
+        type="hidden"
+        name="school_id"
+        value={schoolId ?? ""}
+      />
+
+      <div className="modal-footer">
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={importing || !schoolId}
+        >
+          {importing ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" />
+              Importing...
+            </>
+          ) : (
+            "Import"
+          )}
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-secondary"
+          disabled={importing}
+          onClick={() => {
+            setImportError(null);
+            setShowImport(false);
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
       </Card>
     </AppLayout>
   );

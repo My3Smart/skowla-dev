@@ -49,21 +49,25 @@ class StudentsImport implements ToModel, WithHeadingRow
 
         // Create new student with mapped columns
         return new Student([
-            'name'           => $row['Nama Penuh'] ?? null,
-            'ic'             => $row['No. Kad Pengenalan'] ?? null,
-            'birth_cert_no'  => $row['No. Sijil Lahir'] ?? null,
-            'dob'            => $dob,
-            'age'            => $age, 
-            'grade'          => $row['Darjah/Tingkatan'] ?? null,
-            'class_name'     => $row['Kelas'] ?? null,
-            'gender'         => $row['Jantina'] ?? null,
-            'race'           => $row['Kaum'] ?? null,
-            'religion'       => $row['Agama'] ?? null,
-            'nationality'    => $row['Kewarganegaraan'] ?? null,
-            'orphan'         => $row['Yatim'] ?? null,
-            'oku'            => $row['OKU'] ?? null,
-            'address'        => $row['Alamat'] ?? null,
-            'school_id'      => $this->school_id,
+            'name' => $row['Nama Penuh'] ?? null,
+            'ic' => $row['No. Kad Pengenalan'] ?? null,
+            'birth_cert_no' => $row['No. Sijil Lahir'] ?? null,
+            'dob' => $dob,
+            'age' => $age,
+            'grade' => $row['Darjah/Tingkatan'] ?? null,
+            'class_name' => $row['Kelas'] ?? null,
+            'gender' => match (strtolower(trim((string) ($row['Jantina'] ?? '')))) {
+                'lelaki', 'male' => 'male',
+                'perempuan', 'female' => 'female',
+                default => null,
+            },
+            'race' => $row['Kaum'] ?? null,
+            'religion' => $row['Agama'] ?? null,
+            'nationality' => $row['Kewarganegaraan'] ?? null,
+            'orphan' => $row['Yatim'] ?? null,
+            'oku' => $row['OKU'] ?? null,
+            'address' => $row['Alamat'] ?? null,
+            'school_id' => $this->school_id,
         ]);
     }
 }

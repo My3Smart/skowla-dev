@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/portal/layouts/AppLayout";
-import { api } from "@/portal/api";
+import { api, ApiError } from "@/portal/api";
 
 interface StudentForm {
   id: number;
@@ -29,36 +29,67 @@ export default function StudentEdit() {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
-    let cancelled = false;
-    api<{ student: StudentForm }>(`/api/portal/students/${id}`)
-      .then((res) => {
-        if (!cancelled) setStudent(res.student);
-      })
-      .catch(() => {
-        if (!cancelled) setStudent(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+  let cancelled = false;
+
+  api<{ student: StudentForm }>(`/api/portal/students/${id}`)
+    .then((res) => {
+      console.log("Student data:", res.student);
+      console.log("Gender from database:", res.student.gender);
+
+      if (!cancelled) {
+        setStudent(res.student);
+      }
+    })
+    .catch((error) => {
+      console.error("Failed to load student:", error);
+
+      if (!cancelled) {
+        setStudent(null);
+      }
+    })
+    .finally(() => {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    });
+
+  return () => {
+    cancelled = true;
+  };
+}, [id]);
 
   function update<K extends keyof StudentForm>(key: K, value: StudentForm[K]) {
     setStudent((prev) => (prev ? { ...prev, [key]: value } : prev));
   }
 
-  async function handleUpdate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!student) return;
-    try {
-      await api(`/api/portal/students/${id}`, { method: "PUT", body: student });
-      navigate(`/school/dashboard`);
-    } catch {
-      /* errors could be set here if backend returns them */
+  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  if (!student) return;
+
+  setErrors({});
+
+  try {
+    console.log("Updating student:", student);
+
+    await api(`/api/portal/students/${id}`, {
+      method: "PUT",
+      body: student,
+    });
+
+    alert("Student updated successfully!");
+
+    navigate("/school/students");
+  } catch (err) {
+    console.error("Student update failed:", err);
+
+    if (err instanceof ApiError && err.errors) {
+      setErrors(err.errors);
+    } else {
+      alert("Unable to update student. Please check the console.");
     }
   }
+}
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this student?")) return;
@@ -96,7 +127,24 @@ export default function StudentEdit() {
           </div>
 
           <div className="card-body">
-            <form onSubmit={handleUpdate}>
+            <form
+  onSubmit={handleUpdate}
+  onInvalid={(e) => {
+    console.log("Invalid field:", e.target);
+  }}
+>
+              {Object.keys(errors).length > 0 && (
+  <div className="alert alert-danger">
+    <strong>Unable to update student:</strong>
+    <ul className="mb-0 mt-2">
+      {Object.entries(errors).flatMap(([field, messages]) =>
+        messages.map((message, index) => (
+          <li key={`${field}-${index}`}>{message}</li>
+        ))
+      )}
+    </ul>
+  </div>
+)}
               <div className="mb-3">
                 <label htmlFor="name" className="form-label">Full Name</label>
                 <input type="text" id="name" className="form-control" value={student.name}
@@ -145,8 +193,8 @@ export default function StudentEdit() {
                 <select id="gender" className="form-select" value={student.gender}
                   onChange={(e) => update("gender", e.target.value)} required>
                   <option value="">-- Select Gender --</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
                 </select>
               </div>
 

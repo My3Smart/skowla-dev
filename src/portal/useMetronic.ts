@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 
 const CSS = [
@@ -11,89 +12,177 @@ const JS = [
   "/assets/js/scripts.bundle.js",
 ];
 
-/**
- * Loads the existing Metronic theme assets (the same bundles the Blade layout
- * uses) only while a portal page is mounted, so the rest of the app is untouched.
- */
+// Shared across AppLayout remounts
+let metronicPromise: Promise<void> | null = null;
+let metronicLoaded = false;
+
+function loadCSS() {
+  CSS.forEach((href) => {
+    const existing = Array.from(
+      document.querySelectorAll<HTMLLinkElement>(
+        'link[rel="stylesheet"]'
+      )
+    ).some((link) => link.href === new URL(href, window.location.href).href);
+
+    if (existing) return;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.dataset.metronic = href;
+
+    document.head.appendChild(link);
+  });
+}
+
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const absoluteSrc = new URL(src, window.location.href).href;
+
+    const existing = Array.from(
+      document.querySelectorAll<HTMLScriptElement>("script[src]")
+    ).find((script) => script.src === absoluteSrc);
+
+    if (existing) {
+      if (existing.dataset.metronicLoaded === "true") {
+        resolve();
+        return;
+      }
+
+      if (existing.dataset.metronicLoading === "true") {
+        existing.addEventListener("load", () => resolve(), {
+          once: true,
+        });
+        existing.addEventListener("error", () => reject(
+          new Error(`Failed to load ${src}`)
+        ), { once: true });
+        return;
+      }
+
+      // An existing script may have been loaded elsewhere.
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = src;
+    script.dataset.metronic = src;
+    script.dataset.metronicLoading = "true";
+
+    script.onload = () => {
+      script.dataset.metronicLoaded = "true";
+      delete script.dataset.metronicLoading;
+      resolve();
+    };
+
+    script.onerror = () => {
+      script.remove();
+      reject(new Error(`Failed to load ${src}`));
+    };
+
+    document.body.appendChild(script);
+  });
+}
+
+function configureBody() {
+  document.body.id = "kt_app_body";
+
+  document.body.setAttribute(
+    "data-kt-app-header-fixed-mobile",
+    "true"
+  );
+
+  document.body.setAttribute(
+    "data-kt-app-toolbar-enabled",
+    "true"
+  );
+
+  document.body.classList.add("app-default");
+  document.body.style.background = "#f9f9f9";
+  document.body.style.color = "#252f4a";
+
+  document.documentElement.setAttribute(
+    "data-bs-theme",
+    "light"
+  );
+}
+
+function loadMetronic(): Promise<void> {
+  if (metronicLoaded) {
+    return Promise.resolve();
+  }
+
+  if (metronicPromise) {
+    return metronicPromise;
+  }
+
+  metronicPromise = (async () => {
+    loadCSS();
+
+    const win = window as any;
+
+    if (!win.KTThemeMode) {
+      win.KTThemeMode = {
+        on: () => {},
+        getMode: () => "light",
+        getMenuMode: () => "light",
+        setMode: () => {},
+        init: () => {},
+      };
+    }
+
+    for (const src of JS) {
+      await loadScript(src);
+    }
+
+    metronicLoaded = true;
+  })().catch((error) => {
+    metronicPromise = null;
+    throw error;
+  });
+
+  return metronicPromise;
+}
+
 export function useMetronic() {
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(metronicLoaded);
 
   useEffect(() => {
-    const links: HTMLLinkElement[] = CSS.map((href) => {
-      const existing = document.querySelector<HTMLLinkElement>(
-        `link[data-metronic="${href}"]`
-      );
-      if (existing) return existing;
-      const el = document.createElement("link");
-      el.rel = "stylesheet";
-      el.href = href;
-      el.dataset.metronic = href;
-      document.head.appendChild(el);
-      return el;
-    });
-
-    document.body.id = "kt_app_body";
-    document.body.setAttribute("data-kt-app-header-fixed-mobile", "true");
-    document.body.setAttribute("data-kt-app-toolbar-enabled", "true");
-    document.body.classList.add("app-default");
-    document.body.style.background = "#f9f9f9";
-    document.body.style.color = "#252f4a";
-    document.documentElement.setAttribute("data-bs-theme", "light");
-
-
     let cancelled = false;
 
-    const loadScript = (src: string) =>
-      new Promise<void>((resolve) => {
-        const existing = document.querySelector<HTMLScriptElement>(
-          `script[data-metronic="${src}"]`
-        );
-        if (existing) return resolve();
-        const el = document.createElement("script");
-        el.src = src;
-        el.dataset.metronic = src;
-        el.onload = () => resolve();
-        el.onerror = () => resolve();
-        document.body.appendChild(el);
-      });
+    configureBody();
 
-    (async () => {
-      // The theme bundle is injected after DOMContentLoaded, so its own
-      // "on load" callbacks fire before KTThemeMode is defined. Provide a
-      // temporary stub; the bundle overwrites it once evaluated.
-      const win = window as any;
-      if (!win.KTThemeMode) {
-        win.KTThemeMode = {
-          on: () => {},
-          getMode: () => "light",
-          getMenuMode: () => "light",
-          setMode: () => {},
-          init: () => {},
-        };
-      }
-      for (const src of JS) await loadScript(src);
-      if (!cancelled) setReady(true);
-    })();
+    loadMetronic()
+      .then(() => {
+        if (!cancelled) {
+          setReady(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Metronic loading failed:", error);
+      });
 
     return () => {
       cancelled = true;
-      links.forEach((el) => el.remove());
-      document.body.classList.remove("app-default");
-      document.body.removeAttribute("id");
+
+      // Do not remove the shared Metronic styles/scripts
+      // during React Router navigation.
     };
   }, []);
 
-  // Re-initialise Metronic menu/drawer/sticky components for React-rendered DOM
   useEffect(() => {
     if (!ready) return;
-    const w = window as any;
-    const t = window.setTimeout(() => {
-      w.KTComponents?.init?.();
-      w.KTMenu?.createInstances?.();
-      w.KTDrawer?.createInstances?.();
-      w.KTSticky?.createInstances?.();
-    }, 50);
-    return () => window.clearTimeout(t);
+
+    const timer = window.setTimeout(() => {
+      const win = window as any;
+
+      // Initialize only the components needed by the header.
+      // Avoid KTComponents.init() plus duplicate initializers.
+      win.KTMenu?.createInstances?.();
+      win.KTDrawer?.createInstances?.();
+    }, 100);
+
+    return () => window.clearTimeout(timer);
   }, [ready]);
 
   return ready;
